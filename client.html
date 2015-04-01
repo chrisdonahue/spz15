@@ -16,33 +16,32 @@
 
 <body>
 	<div id="canvas">
-		<canvas id="piano"></canvas>
+		<canvas id="client_ui"></canvas>
 	</div>
 
 	<script type="text/javascript">
-		window.client_options = {};
-
-		window.client_options.client = {};
-		window.client_options.client.midi_note_velocity_initial = 100;
-
-		window.client_options.socket = {};
-		window.client_options.socket.server_ip = 'echo.websocket.org';
-		window.client_options.socket.server_port = 80;
-
-		window.client_options.ui = {}
-		window.client_options.ui.midi_note_number_display_lower_initial = 60;
-		window.client_options.ui.midi_note_number_display_upper_initial = 71;
-		window.client_options.ui.key_spacing = 0.02;
-		window.client_options.ui.key_white_color = 'rgb(255, 255, 255)';
-		window.client_options.ui.key_white_down_color = 'rgb(10, 46, 166)';
-		window.client_options.ui.key_white_outline = 'rgb(50, 50, 50)';
-		window.client_options.ui.key_black_color = 'rgb(0, 0, 0)';
-		window.client_options.ui.key_black_down_color = 'rgb(245, 209, 89)';
-		window.client_options.ui.key_black_outline = 'rgb(50, 50, 50)';
+		window.spz = {};
+		window.spz.client = {};
+		window.spz.client.options = {};
+		window.spz.client.options.ui = {};
+		window.spz.client.options.ui.keyboard = {};
+		window.spz.client.options.ui.keyboard.midi_note_number_lower = 60;
+		window.spz.client.options.ui.keyboard.midi_note_number_upper = 60;
+		
+		window.spz.client.ui = {};
+		
+		window.spz.server = {};
+		window.spz.server.options = {};
+		window.spz.server.options.ip = 'echo.websocket.org';
+		window.spz.server.options.port = 80;
 	</script>
 	<script type="text/javascript" src="js_lib/jquery-1.11.2.min.js"></script>
+	<script type="text/javascript" src="js_lib/fabric.js"></script>
 	<script type="text/javascript" src="js_lib/fingerprint.js"></script>
 	<script type="text/javascript" src="shim.js"></script>
+	<script type="text/javascript" src="helpers.js"></script>
+	<script type="text/javascript" src="server.js"></script>
+	<script type="text/javascript" src="ui.js"></script>
 	<script type="text/javascript" src="client.js"></script>
 </body>
 </html>
