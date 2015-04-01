@@ -1,0 +1,3 @@
+[submodule "client/js_lib/fabric.js"]
+	path = client/js_lib/fabric_js
+	url = git@github.com:kangax/fabric.js.git
