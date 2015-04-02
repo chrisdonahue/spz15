@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 534.7 534.7" enable-background="new 0 0 534.7 534.7" xml:space="preserve">
+<g>
+	<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="438.2566" y1="-28.7368" x2="96.3937" y2="563.3871">
+		<stop  offset="0" style="stop-color:#FFFFFF"/>
+		<stop  offset="0.4892" style="stop-color:#0D7FBF"/>
+		<stop  offset="1" style="stop-color:#F2F2F2"/>
+	</linearGradient>
+	<path fill="url(#SVGID_1_)" d="M472.5,534.2H62.2c-33.9,0-61.7-27.8-61.7-61.7V62.2c0-33.9,27.8-61.7,61.7-61.7h410.3
+		c33.9,0,61.7,27.8,61.7,61.7v410.3C534.2,506.4,506.4,534.2,472.5,534.2z"/>
+	<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="0" y1="267.3252" x2="534.6504" y2="267.3252">
+		<stop  offset="0" style="stop-color:#FFFFFF"/>
+		<stop  offset="0.4892" style="stop-color:#C4E7F2"/>
+		<stop  offset="1" style="stop-color:#F2F2F2"/>
+	</linearGradient>
+	<path fill="none" stroke="url(#SVGID_2_)" stroke-miterlimit="10" d="M472.5,534.2H62.2c-33.9,0-61.7-27.8-61.7-61.7V62.2
+		c0-33.9,27.8-61.7,61.7-61.7h410.3c33.9,0,61.7,27.8,61.7,61.7v410.3C534.2,506.4,506.4,534.2,472.5,534.2z"/>
+</g>
+<path opacity="0.29" fill="#FFFFFF" d="M472.5,1.4H62.2C28.3,1.4,0.5,29.2,0.5,63.1v152.2c70.8,29.6,165.3,47.6,269,47.6
+	c101.6,0,194.3-17.3,264.6-45.8v-154C534.2,29.2,506.4,1.4,472.5,1.4z"/>
+<g>
+	<defs>
+		<path id="SVGID_3_" d="M472.5,534.2H62.2c-33.9,0-61.7-27.8-61.7-61.7V62.2c0-33.9,27.8-61.7,61.7-61.7h410.3
+			c33.9,0,61.7,27.8,61.7,61.7v410.3C534.2,506.4,506.4,534.2,472.5,534.2z"/>
+	</defs>
+	<clipPath id="SVGID_4_">
+		<use xlink:href="#SVGID_3_"  overflow="visible"/>
+	</clipPath>
+	<polyline clip-path="url(#SVGID_4_)" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-miterlimit="10" points="0.5,534.2 
+		107.4,166.2 213.9,276.9 405,276.9 534.2,539 	"/>
+</g>
+</svg>
