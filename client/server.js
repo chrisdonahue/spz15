@@ -11,7 +11,7 @@
 		console.log('socket open');
 		
 		// send device fingerprint
-		spz.server.send(new fingerprint().get());
+		spz.server.send(spz.client.fingerprint);
 	};
 	
 	spz.server.callbacks.close = function (event) {
@@ -37,6 +37,9 @@
 	/*
 		init server
 	*/
+
+	// init client fingerprint
+	spz.client.fingerprint = new fingerprint().get();
 	
 	try {
 		var server_uri = 'ws://' + String(spz.server.options.ip) + ':' + String(spz.server.options.port);

@@ -1,4 +1,4 @@
-(function (spz, $, fabric) {
+(function (spz, $) {
 	/*
 		check for necessary APIs
 	*/
@@ -14,7 +14,7 @@
 	}
 
 	/*
-		namespace janitorial
+		namespacing
 	*/
 	
 	spz.client = spz.client || {};
@@ -205,9 +205,8 @@
 		return function (event) {
 			var browser_viewport_width = $(window).width();
 			var browser_viewport_height = $(window).height();
-			canvas.setWidth(browser_viewport_width);
-			canvas.setHeight(browser_viewport_height);
-			//helpers.ui.midi_note_number_to_bounding_box_recalculate();
+			canvas.width = browser_viewport_width;
+			canvas.height = browser_viewport_height;
 		};
 	};
 
@@ -216,34 +215,16 @@
 		$('body').css({'overflow': 'hidden'});
 		
 		// create fabric canvas
-		var canvas = new fabric.Canvas('client_ui');
-		canvas.setBackgroundColor('pink');
+		var canvas = $('div#canvas canvas#client_ui').get(0);
 		
 		// register window resize callback
 		callback_ui_window_resize(canvas)();
 		$(window).resize(callback_ui_window_resize(canvas));
+
+		// create views
+		var view_keyboard = new spz.client.views.keyboard(10, 20, 20, 20);
 		
-		// create rect
-        var rect = new spz.client.views.nav_button({
-            top : 500,
-            left : 100,
-            width : 60,
-            height : 100,
-            fill : 'blue'
-        });
-		
-		// add it
-		canvas.add(rect);
-		
-		// test events
-		canvas.on('mouse:down', function(options) {
-			console.log('hello');
-		});
-		
-		canvas.forEachObject(function(o){o.selectable = false});
-	};
-	
-	// register document ready callback
-	$(document).ready(callback_document_ready);
-	
-})(window.spz, window.jQuery, window.fabric);
+		// register document ready callback
+		$(document).ready(callback_document_ready);
+	}	
+})(window.spz, window.jQuery);
