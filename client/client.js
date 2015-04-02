@@ -22,14 +22,6 @@
 	spz.client.ui = spz.client.ui || {};
 	
 	/*
-		defines
-	*/
-	
-	spz.client.defines = {
-		touch_id_mouse: 'mouse'
-	};
-
-	/*
 		control state
 	*/
 	
@@ -47,33 +39,8 @@
 	
 	$.extend(spz.client.ui, spz.client.options.ui);
 
+
 	/*
-	helpers.ui.midi_note_number_to_bounding_box = function(midi_note_number) {
-		// return cached result
-		if (state.ui.midi_note_number_to_bounding_box !== null) {
-			if (midi_note_number in state.ui.midi_note_number_to_bounding_box) {
-				return state.ui.midi_note_number_to_bounding_box[midi_note_number];
-			}
-			else {
-				return null;
-			}
-		}
-		throw 'helpers.ui.note_number_to_bounding_box: called before helpers.ui.note_number_to_bounding_box_recalculate';
-	};
-
-	helpers.ui.note_number_display_range_set = function(lower, upper) {
-		if (lower > upper) {
-			throw 'helpers.ui.note_number_display_range_set: value range invalid';
-		}
-		state.ui.midi_note_number_display_lower = lower;
-		state.ui.midi_note_number_display_upper = upper;
-		helpers.ui.midi_note_number_to_bounding_box_recalculate();
-	};
-
-	helpers.ui.intersect_bounding_box = function(x, y, bounding_box) {
-		return (bounding_box.x <= x && x < bounding_box.x + bounding_box.width) && (bounding_box.y <= y && y < bounding_box.y + bounding_box.height);
-	};
-
 	helpers.ui.mouse_event_to_canvas_pos = function(event) {
 		return {
 			x: event.clientX - state.ui.canvas_left_px,
@@ -141,9 +108,10 @@
 	var callback_ui_window_resize = function () {
 		var browser_viewport_width = $(window).width();
 		var browser_viewport_height = $(window).height();
-		spz.client.ui.canvas.width = browser_viewport_width;
-		spz.client.ui.canvas.height = browser_viewport_height;
-		spz.client.ui.root.redraw();
+		spz.client.ui.canvas.width = spz.client.ui.width = browser_viewport_width;
+		spz.client.ui.canvas.height = spz.client.ui.height = browser_viewport_height;
+		spz.client.ui.orientation = spz.helpers.ui.orientation_get(browser_viewport_width, browser_viewport_height);
+		spz.client.ui.root.bounding_box_set(0, 0, browser_viewport_width, browser_viewport_height);
 		callback_ui_redraw();
 	};
 
@@ -184,7 +152,7 @@
 	});
 
 	var callback_ui_redraw = function () {
-		spz.client.ui.canvas_ctx.drawImage(spz.client.ui.root.buffer_get(), 0, 0);
+		spz.client.ui.root.redraw(spz.client.ui.canvas_ctx);
 	};
 
 	var callback_document_ready = function () {
