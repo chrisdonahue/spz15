@@ -1,4 +1,5 @@
 (function (spz, ctor) {
+	spz.client.objects = spz.client.objects || {};
 	spz.client.views = spz.client.views || {};
 
 	var bounded_object = ctor(function(prototype, _, _protected, __, __private) {
@@ -15,53 +16,80 @@
 	var rectangle = bounded_object.subclass(function(prototype, _, _protected, __, __private) {
 		// public
 		prototype.init = function (x, y, width, height) {
-			__(this).bounding_box = {
-				x: x || 0,
-				y: y || 0,
-				width: width || 0,
-				height: height || 0
-			};
+			_(this).bb = spz.client.objects.bb_abs(x, y, width, height);
 		};
 
 		prototype.intersects = function () {
-			var bounding_box = __(this).bounding_box;
+			var bounding_box = _(this).bounding_box;
 			return (bounding_box.x <= x && x < bounding_box.x + bounding_box.width) && (bounding_box.y <= y && y < bounding_box.y + bounding_box.height);
 		};
 
 		prototype.bounding_box_set = function (x, y, width, height) {
-			__(this).bounding_box.x = x;
-			__(this).bounding_box.y = y;
-			__(this).bounding_box.width = width;
-			__(this).bounding_box.height = height;
+			_(this).bounding_box.x = x;
+			_(this).bounding_box.y = y;
+			_(this).bounding_box.width = width;
+			_(this).bounding_box.height = height;
 		};
 
 		prototype.bounding_box_get = function () {
-			return __(this).bounding_box;
+			return _(this).bounding_box;
 		};
 	});
 
 	spz.client.views.base = rectangle.subclass(function(prototype, _, _protected, __, __private) {
 		// public
 		prototype.init = function (x, y, width, height) {
-			prototype.super.init.call(this, arguments);
-			__(this).buffer = document.createElement('canvas');
-			__(this).buffer_ctx = __(this).buffer.getContext('2d');
-			__(this).buffer_dirty = false;
+			prototype.super.init.apply(this, arguments);
+			_(this).subviews = {};
 		};
 
-		prototype.buffer_get = function () {
-			return __(this).buffer;
-		};
-
-		prototype.redraw = function () {
-			__(this).buffer_ctx.fillStyle = 'rgb(255, 0, 255)';
-			__(this).buffer_ctx.fillRect(0, 0, 100, 100);
+		prototype.redraw = function (canvas_ctx) {
+			// redraw subviews
+			for (var view in _(this).subviews) {
+				view.redraw(canvas_ctx);
+			}
 		};
 	});
 
 	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {};
+		__private.settings[spz.defines.orientation.landscape] = {
+			nav: {
+				x: 0.0,
+				y: 0.0,
+				width: 0.2,
+				height: 1.0
+			}
+		};
+		__private.settings[spz.defines.orientation.portrait] = {
+			nav: {
+				x: 0.0,
+				y: 0.0,
+				width: 1.0,
+				height: 0.2
+			}
+		};
+
 		prototype.init = function (x, y, width, height) {
-			prototype.super.init.call(this, arguments);
+			prototype.super.init.apply(this, arguments);
+		};
+
+		prototype.redraw = function (canvas_ctx) {
+			prototype.super.redraw.call(this, canvas_ctx);
+
+			var bb = _(this).bounding_box;
+			var nav_bb = spz.helpers.ui.bb_relative_to_absolute(__(this).settings[spz.client.ui.orientation].nav, bb, true);
+
+			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
+			canvas_ctx.fillRect(nav_bb.x, nav_bb.y, nav_bb.width, nav_bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 255)';
+			if (spz.client.ui.orientation == spz.defines.orientation.landscape) {
+				canvas_ctx.fillRect(nav_bb.width, 0, bb.width - nav_bb.width, bb.height);
+			}
+			else {
+				canvas_ctx.fillRect(0, nav_bb.height, bb.width, bb.height - nav_bb.height);
+			}
+
 		};
 	});
 
@@ -88,7 +116,7 @@
 			__(this).recalc_midi_note_number_to_bounding_box();
 		};
 
-		prototype.redraw = function () {
+		prototype.redraw = function (canvas_ctx) {
 		};
 
 		// private methods

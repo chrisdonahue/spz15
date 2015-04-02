@@ -66,4 +66,10 @@
 		ui
 	*/
 
+	spz.helpers.ui = spz.helpers.ui || {}
+
+	spz.helpers.ui.orientation_get = function (width, height) {
+		return width > height ? spz.defines.orientation.landscape : spz.defines.orientation.portrait;
+	};
+	
 })(window.spz);
