@@ -48,65 +48,6 @@
 	$.extend(spz.client.ui, spz.client.options.ui);
 
 	/*
-	helpers.ui.midi_note_number_to_bounding_box_recalculate = function() {
-		state.ui.midi_note_number_to_bounding_box = {};
-
-		// count white keys
-		var keys_white_total = 0;
-		for (var midi_note_number = state.ui.midi_note_number_display_lower; midi_note_number <= state.ui.midi_note_number_display_upper; midi_note_number++) {
-			if (helpers.midi.note_number_key_white_is(midi_note_number)) {
-				keys_white_total++;
-			}
-		}
-
-		// create bounding boxes
-		var key_white_width = Math.floor(state.ui.canvas_width_px / keys_white_total);
-		var canvas_width_remainder = Math.floor(state.ui.canvas_width_px % keys_white_total);
-		var key_white_width_extra_every = Math.floor(keys_white_total / canvas_width_remainder);
-		var key_white_height = state.ui.canvas_height_px;
-		var key_black_width = key_white_width * 0.7;
-		var key_black_height = key_white_height * 0.6;
-		var key_black_offset = key_white_width * 0.35;
-		var keys_white_calculated = 0;
-		var keys_black_calculated = 0;
-		var canvas_width_covered = 0;
-		for (midi_note_number = state.ui.midi_note_number_display_lower; midi_note_number <= state.ui.midi_note_number_display_upper; midi_note_number++) {
-			var bounding_box = {};
-
-			// white key bounding box
-			if (helpers.midi.note_number_key_white_is(midi_note_number)) {
-				bounding_box.x = canvas_width_covered;
-				bounding_box.y = 0;
-				bounding_box.width = key_white_width;
-				bounding_box.height = key_white_height;
-				// add extra space every few notes to fill in remainder
-				if (keys_white_calculated === keys_white_total - 1) {
-					bounding_box.width += canvas_width_remainder;
-					canvas_width_remainder = 0;
-				}
-				else if (keys_white_calculated % key_white_width_extra_every === 0 && canvas_width_remainder > 0) {
-					bounding_box.width += 1;
-					canvas_width_remainder--;
-				}
-				keys_white_calculated++;
-				canvas_width_covered += bounding_box.width;
-			}
-			// black key bounding box
-			else {
-				bounding_box.x = canvas_width_covered - key_black_offset;
-				bounding_box.y = 0;
-				bounding_box.width = key_black_width;
-				bounding_box.height = key_black_height;
-				keys_black_calculated++;
-			}
-
-			state.ui.midi_note_number_to_bounding_box[midi_note_number] = bounding_box;
-		}
-		
-		// mark 
-		state.ui.canvas_buffer_dirty = true;
-	};
-
 	helpers.ui.midi_note_number_to_bounding_box = function(midi_note_number) {
 		// return cached result
 		if (state.ui.midi_note_number_to_bounding_box !== null) {
@@ -193,38 +134,94 @@
 		*/
 
 	/*
-		socket
-	*/
-
-	/*
 		ui
 	*/
 
 	// ui callbacks
-	var callback_ui_window_resize = function (canvas) {
-		return function (event) {
-			var browser_viewport_width = $(window).width();
-			var browser_viewport_height = $(window).height();
-			canvas.width = browser_viewport_width;
-			canvas.height = browser_viewport_height;
+	var callback_ui_window_resize = function () {
+		var browser_viewport_width = $(window).width();
+		var browser_viewport_height = $(window).height();
+		spz.client.ui.canvas.width = browser_viewport_width;
+		spz.client.ui.canvas.height = browser_viewport_height;
+		spz.client.ui.root.redraw();
+		callback_ui_redraw();
+	};
+
+	var callback_ui_canvas_mouse_move = function (event) {
+	};
+
+	var callback_ui_canvas_mouse_down = function (event) {
+	};
+
+	var callback_ui_canvas_mouse_up = function (event) {
+	};
+
+	var callback_ui_canvas_mouse_leave = function (event) {
+	};
+
+	var _callback_ui_canvas_touch_shim = function (callback) {
+		return function(event) {
+			if (!('targetTouches' in event)) {
+				event = event.originalEvent;
+			}
+			callback(event);
 		};
+	};
+
+	var callback_ui_canvas_touch_start = _callback_ui_canvas_touch_shim(function (event) {
+	});
+
+	var callback_ui_canvas_touch_move = _callback_ui_canvas_touch_shim(function (event) {
+	});
+
+	var callback_ui_canvas_touch_end = _callback_ui_canvas_touch_shim(function (event) {
+	});
+
+	var callback_ui_canvas_touch_cancel = _callback_ui_canvas_touch_shim(function (event) {
+	});
+
+	var callback_ui_canvas_touch_leave = _callback_ui_canvas_touch_shim(function (event) {
+	});
+
+	var callback_ui_redraw = function () {
+		spz.client.ui.canvas_ctx.drawImage(spz.client.ui.root.buffer_get(), 0, 0);
 	};
 
 	var callback_document_ready = function () {
 		// remove scrollbars
 		$('body').css({'overflow': 'hidden'});
 		
-		// create fabric canvas
-		var canvas = $('div#canvas canvas#client_ui').get(0);
-		
-		// register window resize callback
-		callback_ui_window_resize(canvas)();
-		$(window).resize(callback_ui_window_resize(canvas));
+		// link to canvas
+		var $canvas = $('div#canvas canvas#client_ui');
+		var canvas = spz.client.ui.canvas = $canvas.get(0);
+		var canvas_ctx = spz.client.ui.canvas_ctx = canvas.getContext('2d');
 
-		// create views
-		var view_keyboard = new spz.client.views.keyboard(10, 20, 20, 20);
+		// create views recursively
+		spz.client.ui.root = new spz.client.views.root();
+
+		// register resize callback
+		$(window).resize(callback_ui_window_resize);
 		
-		// register document ready callback
-		$(document).ready(callback_document_ready);
-	}	
+		// draw views
+		callback_ui_window_resize();
+
+		// register canvas callback
+		if (!window.supports_touch_events) {
+			$canvas.on('mousemove', callback_ui_canvas_mouse_move);
+			$canvas.on('mousedown', callback_ui_canvas_mouse_down);
+			$canvas.on('mouseup', callback_ui_canvas_mouse_up);
+			$canvas.on('mouseleave', callback_ui_canvas_mouse_leave);
+		}
+		else {
+			$canvas.on('touchstart', callback_ui_canvas_touch_start);
+			$canvas.on('touchmove', callback_ui_canvas_touch_move);
+			$canvas.on('touchend', callback_ui_canvas_touch_end);
+			$canvas.on('touchcancel', callback_ui_canvas_touch_cancel);
+			$canvas.on('touchleave', callback_ui_canvas_touch_leave);
+		}
+	};
+
+	// register document ready callback
+	$(document).ready(callback_document_ready);
+
 })(window.spz, window.jQuery);

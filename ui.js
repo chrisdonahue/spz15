@@ -16,10 +16,10 @@
 		// public
 		prototype.init = function (x, y, width, height) {
 			__(this).bounding_box = {
-				x: x,
-				y: y,
-				width: width,
-				height: height
+				x: x || 0,
+				y: y || 0,
+				width: width || 0,
+				height: height || 0
 			};
 		};
 
@@ -46,6 +46,7 @@
 			prototype.super.init.call(this, arguments);
 			__(this).buffer = document.createElement('canvas');
 			__(this).buffer_ctx = __(this).buffer.getContext('2d');
+			__(this).buffer_dirty = false;
 		};
 
 		prototype.buffer_get = function () {
@@ -53,7 +54,14 @@
 		};
 
 		prototype.redraw = function () {
-			throw "abstract method called";
+			__(this).buffer_ctx.fillStyle = 'rgb(255, 0, 255)';
+			__(this).buffer_ctx.fillRect(0, 0, 100, 100);
+		};
+	});
+
+	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		prototype.init = function (x, y, width, height) {
+			prototype.super.init.call(this, arguments);
 		};
 	});
 
@@ -139,7 +147,7 @@
 					keys_black_calculated++;
 				}
 
-				_(this).midi_note_number_to_bounding_box[midi_note_number] = bounding_box;
+				__(this).midi_note_number_to_bounding_box[midi_note_number] = bounding_box;
 			}
 		};
 	});
