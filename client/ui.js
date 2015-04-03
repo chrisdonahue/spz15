@@ -2,83 +2,92 @@
 	spz.client.objects = spz.client.objects || {};
 	spz.client.views = spz.client.views || {};
 
-	var bounded_object = ctor(function(prototype, _, _protected, __, __private) {
+	var component = ctor(function(prototype, _, _protected, __, __private) {
 		// public
 		prototype.init = function () {
 			throw "abstract method called";
 		};
 
-		prototype.intersects = function (x, y) {
+		prototype.contains = function (x, y) {
 			throw "abstract method called";
 		};
 	});
 
-	var rectangle = bounded_object.subclass(function(prototype, _, _protected, __, __private) {
+	spz.client.views.base = component.subclass(function(prototype, _, _protected, __, __private) {
+		_protected.settings = {};
+		_protected.settings[spz.defines.orientation.landscape] = {};
+		_protected.settings[spz.defines.orientation.portrait] = {};
+
 		// public
-		prototype.init = function (x, y, width, height) {
-			_(this).bb = spz.client.objects.bb_abs(x, y, width, height);
-		};
-
-		prototype.intersects = function () {
-			var bounding_box = _(this).bounding_box;
-			return (bounding_box.x <= x && x < bounding_box.x + bounding_box.width) && (bounding_box.y <= y && y < bounding_box.y + bounding_box.height);
-		};
-
-		prototype.bounding_box_set = function (x, y, width, height) {
-			_(this).bounding_box.x = x;
-			_(this).bounding_box.y = y;
-			_(this).bounding_box.width = width;
-			_(this).bounding_box.height = height;
-		};
-
-		prototype.bounding_box_get = function () {
-			return _(this).bounding_box;
-		};
-	});
-
-	spz.client.views.base = rectangle.subclass(function(prototype, _, _protected, __, __private) {
-		// public
-		prototype.init = function (x, y, width, height) {
-			prototype.super.init.apply(this, arguments);
+		prototype.init = function (bb) {
+			_(this).bb = bb || new spz.client.objects.bb_abs();
 			_(this).subviews = {};
+		};
+
+		prototype.bb_set = function (bb) {
+			_(this).bb = bb;
+		};
+		
+		prototype.bb_get = function (bb) {
+			return _(this).bb;
+		};
+		
+		prototype.contains = function (x, y) {
+			return _(this).bb.contains(x, y);
 		};
 
 		prototype.redraw = function (canvas_ctx) {
 			// redraw subviews
-			for (var view in _(this).subviews) {
-				view.redraw(canvas_ctx);
+			for (subview_identifier in _(this).subviews) {
+				_(this).subviews[subview_identifier].redraw(canvas_ctx);
 			}
 		};
 	});
 
 	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {};
-		__private.settings[spz.defines.orientation.landscape] = {
-			nav: {
-				x: 0.0,
-				y: 0.0,
-				width: 0.2,
-				height: 1.0
-			}
-		};
-		__private.settings[spz.defines.orientation.portrait] = {
-			nav: {
-				x: 0.0,
-				y: 0.0,
-				width: 1.0,
-				height: 0.2
-			}
+		_protected.settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
+			0.0,
+			0.0,
+			0.2,
+			1.0
+		);
+		_protected.settings[spz.defines.orientation.landscape].section = new spz.client.objects.bb_rel(
+			0.2,
+			0.0,
+			0.8,
+			1.0
+		);
+		_protected.settings[spz.defines.orientation.landscape].section_border = 0.02;
+
+		_protected.settings[spz.defines.orientation.portrait].nav = new spz.client.objects.bb_rel(
+			0.0,
+			0.0,
+			1.0,
+			0.2
+		);
+		_protected.settings[spz.defines.orientation.portrait].section = new spz.client.objects.bb_rel(
+			0.0,
+			0.2,
+			1.0,
+			0.8
+		);
+		_protected.settings[spz.defines.orientation.portrait].section_border = 0.02;
+
+		prototype.init = function (bb) {
+			prototype.super.init.call(this, bb);
+			__(this).section_bb_recalculate();
+			//_(this).subviews[spz.defines.views.keyboard] = new spz.client.views.keyboard(__(this).section_bb);
 		};
 
-		prototype.init = function (x, y, width, height) {
-			prototype.super.init.apply(this, arguments);
+		prototype.bb_set = function (bb) {
+			prototype.super.bb_set.call(this, bb);
+			__(this).section_bb_recalculate();
+			//_(this).subviews[spz.defines.views.keyboard].bb_set(__(this).section_bb);
 		};
 
 		prototype.redraw = function (canvas_ctx) {
-			prototype.super.redraw.call(this, canvas_ctx);
-
-			var bb = _(this).bounding_box;
-			var nav_bb = spz.helpers.ui.bb_relative_to_absolute(__(this).settings[spz.client.ui.orientation].nav, bb, true);
+			var bb = _(this).bb;
+			var nav_bb = _(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
 			canvas_ctx.fillRect(nav_bb.x, nav_bb.y, nav_bb.width, nav_bb.height);
@@ -90,6 +99,12 @@
 				canvas_ctx.fillRect(0, nav_bb.height, bb.width, bb.height - nav_bb.height);
 			}
 
+			prototype.super.redraw.call(this, canvas_ctx);
+		};
+
+		__private.section_bb_recalculate = function () {
+			var settings = _(this).settings[spz.client.ui.orientation];
+			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
 		};
 	});
 
@@ -105,18 +120,21 @@
 		};
 
 		// public methods
-		prototype.init = function (x, y, width, height) {
-			prototype.super.init.call(this, arguments);
+		prototype.init = function (bb) {
+			prototype.super.init.call(this, bb);
 			__(this).midi_note_number_to_bounding_box = {};
-			__(this).recalc_midi_note_number_to_bounding_box();
+			//__(this).recalc_midi_note_number_to_bounding_box();
 		};
 
-		prototype.bounding_box_set = function (x, y, width, height) {
-			prototype.super.bounding_box_set.call(this, arguments);
-			__(this).recalc_midi_note_number_to_bounding_box();
+		prototype.bb_set = function (bb) {
+			prototype.super.bb_set.call(this, bb);
+			//__(this).recalc_midi_note_number_to_bounding_box();
 		};
 
 		prototype.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+			canvas_ctx.fillStyle = 'rgb(255, 255, 255)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 
 		// private methods
