@@ -18,6 +18,7 @@
 		prototype.init = function (bb) {
 			_(this).bb = bb || new spz.client.objects.bb_abs();
 			_(this).subviews = {};
+			_(this).dirty = true;
 		};
 
 		prototype.bb_set = function (bb) {
@@ -32,11 +33,44 @@
 			return _(this).bb.contains(x, y);
 		};
 
+		prototype.touch_start = function (event) {
+		};
+
+		prototype.touch_move = function (event) {
+		};
+
+		prototype.touch_end = function (event) {
+		};
+
+		prototype.touch_cancel = function (event) {
+		};
+
+		prototype.touch_leave = function (event) {
+		};
+
+		prototype.redraw_necessary = function () {
+			if (_(this).dirty) {
+				return true;
+			}
+			for (subview_id in _(this).subviews) {
+				if (_(this).subviews[subview_id].redraw_necessary()) {
+					return true;
+				}
+			}
+			return false;
+		};
+
 		prototype.redraw = function (canvas_ctx) {
 			// redraw subviews
-			for (subview_identifier in _(this).subviews) {
-				_(this).subviews[subview_identifier].redraw(canvas_ctx);
+			for (subview_id in _(this).subviews) {
+				var subview = _(this).subviews[subview_id];
+				if (subview.redraw_necessary()) {
+					subview.redraw(canvas_ctx);
+				}
 			}
+
+			// mark as clean
+			_(this).dirty = false;
 		};
 	});
 
@@ -82,6 +116,49 @@
 			prototype.super.bb_set.call(this, bb);
 			__(this).section_bb_recalculate.call(this);
 			_(this).subviews[spz.defines.views.keyboard].bb_set(__(this).section_bb);
+		};
+
+		prototype.touch_start = function (event) {
+			var view_current = _(this).subviews[spz.client.ui.view_current];
+			var touch_event = event.changedTouches[0];
+			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
+				view_current.touch_start(event);
+			}
+		};
+
+		prototype.touch_move = function (event) {
+			var view_current = _(this).subviews[spz.client.ui.view_current];
+			var touch_event = event.changedTouches[0];
+			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
+				view_current.touch_move(event);
+			}
+		};
+
+		prototype.touch_end = function (event) {
+			var view_current = _(this).subviews[spz.client.ui.view_current];
+			var touch_event = event.changedTouches[0];
+			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
+				view_current.touch_end(event);
+			}
+			else {
+				// change view
+			}
+		};
+
+		prototype.touch_cancel = function (event) {
+			var view_current = _(this).subviews[spz.client.ui.view_current];
+			var touch_event = event.changedTouches[0];
+			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
+				view_current.touch_cancel(event);
+			}
+		};
+
+		prototype.touch_leave = function (event) {
+			var view_current = _(this).subviews[spz.client.ui.view_current];
+			var touch_event = event.changedTouches[0];
+			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
+				view_current.touch_leave(event);
+			}
 		};
 
 		prototype.redraw = function (canvas_ctx) {
@@ -135,6 +212,112 @@
 			__(this).buffer.width = _(this).bb.width;
 			__(this).buffer.height = _(this).bb.height;
 			__(this).recalc_midi_note_number_to_bb.call(this);
+		};
+
+		prototype.touch_start = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch = event.changedTouches[i];
+				var touch_id = touch.identifier;
+				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
+				if (!(midi_note_number in spz.client.control.midi_note_number_to_touch_id)) {
+					//helpers.client.midi_note_number_on(midi_note_number);
+					spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
+					spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
+				}
+			}
+		};
+
+		prototype.touch_move = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch = event.changedTouches[i];
+				var touch_id = touch.identifier;
+				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number_old = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					if (midi_note_number_old !== midi_note_number) {
+						//helpers.client.midi_note_number_off(midi_note_number);
+						delete spz.client.control.midi_note_number_to_touch_id[midi_note_number_old];
+						delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+						//helpers.client.midi_note_number_on(midi_note_number);
+						spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
+						spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
+					}
+				}
+			}
+		};
+
+		prototype.touch_end = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch_id = event.changedTouches[i].identifier;
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					//helpers.client.midi_note_number_off(midi_note_number);
+					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
+					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+				}
+			}
+		};
+
+		prototype.touch_cancel = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch_id = event.changedTouches[i].identifier;
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					//helpers.client.midi_note_number_off(midi_note_number);
+					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
+					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+				}
+			}
+		};
+
+		prototype.touch_leave = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch_id = event.changedTouches[i].identifier;
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					//helpers.client.midi_note_number_off(midi_note_number);
+					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
+					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+				}
+			}
+		};
+
+		__private.touch_to_midi_note_number = function (touch) {
+			var bb = _(this).bb;
+			var x = touch.clientX - bb.x;
+			var y = touch.clientY - bb.y;
+
+			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
+			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
+
+			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
+
+			// try black keys
+			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
+				if (spz.helpers.midi.note_number_key_white_is(midi_note_number)) {
+					continue;
+				}
+
+				var bb = midi_note_number_to_bb[midi_note_number];
+				if (bb.contains(x, y)) {
+					return midi_note_number;
+				}
+			}
+
+			// try white keys
+			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
+				if (spz.helpers.midi.note_number_key_black_is(midi_note_number)) {
+					continue;
+				}
+
+				var bb = midi_note_number_to_bb[midi_note_number];
+				if (bb.contains(x, y)) {
+					return midi_note_number;
+				}
+			}
+
+			// no note pressed (this shouldn't happen)
+			return null;
 		};
 
 		prototype.redraw = function (canvas_ctx) {
@@ -198,7 +381,7 @@
 			// highlight selected note
 			for (var midi_note_number_string in spz.client.control.midi_note_number_to_touch_id) {
 				var midi_note_number = Number(midi_note_number_string);
-				var key_white_is = helpers.midi.note_number_key_white_is(midi_note_number);
+				var key_white_is = spz.helpers.midi.note_number_key_white_is(midi_note_number);
 
 				// set fill color
 				if (key_white_is) {
@@ -211,7 +394,7 @@
 				// fill
 				var bb_key = midi_note_number_to_bb[midi_note_number];
 				var key_outline = Math.max(1, Math.floor(settings.key_spacing * bb_key.width));
-				canvas_ctx.fillRect(bb_key.x + key_outline, bb_key.y + key_outline, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
+				canvas_ctx.fillRect(bb_key.x + key_outline + bb.x, bb_key.y + key_outline + bb.y, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
 
 				// redraw surrounding black keys
 				if (key_white_is) {
@@ -219,16 +402,16 @@
 					canvas_ctx.fillStyle = settings.key_black_color;
 					for (var i = 0; i < 2; i++) {
 						var midi_note_number_adjacent = midi_note_number_adjacents[i];
-						if (helpers.midi.note_number_key_white_is(midi_note_number_adjacent)) {
+						if (spz.helpers.midi.note_number_key_white_is(midi_note_number_adjacent)) {
 							continue;
 						}
-						var bb_key = midi_note_number_to_bb(midi_note_number_adjacent);
+						var bb_key = midi_note_number_to_bb[midi_note_number_adjacent];
 						if (bb_key !== null) {
 							canvas_ctx.fillStyle = settings.key_black_outline;
-							canvas_ctx.fillRect(bb_key.x, bb_key.y, bb_key.width, bb_key.height);
+							canvas_ctx.fillRect(bb_key.x + bb.x, bb_key.y + bb.y, bb_key.width, bb_key.height);
 							canvas_ctx.fillStyle = settings.key_black_color;
 							var key_outline = Math.max(1, Math.floor(settings.key_spacing * bb_key.width));
-							canvas_ctx.fillRect(bb_key.x + key_outline, bb_key.y + key_outline, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
+							canvas_ctx.fillRect(bb_key.x + key_outline + bb.x, bb_key.y + key_outline + bb.y, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
 						}
 					}
 				}
@@ -256,9 +439,9 @@
 			var canvas_width_remainder = Math.floor(bb.width % keys_white_total);
 			var key_white_width_extra_every = Math.floor(keys_white_total / canvas_width_remainder);
 			var key_white_height = bb.height;
-			var key_black_width = key_white_width * 0.7;
-			var key_black_height = key_white_height * 0.6;
-			var key_black_offset = key_white_width * 0.35;
+			var key_black_width = Math.floor(key_white_width * 0.7);
+			var key_black_height = Math.floor(key_white_height * 0.6);
+			var key_black_offset = Math.floor(key_white_width * 0.35);
 			var keys_white_calculated = 0;
 			var keys_black_calculated = 0;
 			var canvas_width_covered = 0;

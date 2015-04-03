@@ -59,7 +59,7 @@
 	})();
 	
 	spz.helpers.midi.note_number_key_black_is = function(midi_note_number) {
-		return !(helpers.midi.note_number_key_white_is(midi_note_number));
+		return !(spz.helpers.midi.note_number_key_white_is(midi_note_number));
 	};
 
 	/*
