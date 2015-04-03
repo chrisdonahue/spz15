@@ -38,6 +38,7 @@
 	*/
 	
 	$.extend(spz.client.ui, spz.client.options.ui);
+	spz.client.ui.view_current = spz.defines.views.keyboard;
 
 	spz.client.ui.orientation = spz.defines.orientation.landscape;
 
@@ -117,44 +118,75 @@
 		callback_ui_redraw();
 	};
 
-	var callback_ui_canvas_mouse_move = function (event) {
+	var _callback_ui_canvas_mouse_wrapper = function (callback) {
+		return function(event) {
+			event.changedTouches = [];
+			event.changedTouches.push({
+				clientX: event.clientX || -1,
+				clientY: event.clientY || -1,
+				identifier: spz.defines.touch_id_mouse
+			});
+			return callback(event);
+		};
 	};
 
-	var callback_ui_canvas_mouse_down = function (event) {
-	};
+	var callback_ui_canvas_mouse_move = _callback_ui_canvas_mouse_wrapper(function (event) {
+		spz.client.ui.root.touch_move(event);
+		callback_ui_redraw();
+	});
 
-	var callback_ui_canvas_mouse_up = function (event) {
-	};
-
-	var callback_ui_canvas_mouse_leave = function (event) {
-	};
-
+	var callback_ui_canvas_mouse_down = _callback_ui_canvas_mouse_wrapper(function (event) {
+		spz.client.ui.root.touch_start(event);
+		callback_ui_redraw();
+	});
+	
+	var callback_ui_canvas_mouse_up = _callback_ui_canvas_mouse_wrapper(function (event) {
+		spz.client.ui.root.touch_end(event);
+		callback_ui_redraw();
+	});
+	
+	var callback_ui_canvas_mouse_leave = _callback_ui_canvas_mouse_wrapper(function (event) {
+		spz.client.ui.root.touch_leave(event);
+		callback_ui_redraw();
+	});
+	
 	var _callback_ui_canvas_touch_shim = function (callback) {
 		return function(event) {
-			if (!('targetTouches' in event)) {
+			if (!('changedTouches' in event)) {
 				event = event.originalEvent;
 			}
-			callback(event);
+			return callback(event);
 		};
 	};
 
 	var callback_ui_canvas_touch_start = _callback_ui_canvas_touch_shim(function (event) {
+		spz.client.ui.root.touch_start(event);
+		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_move = _callback_ui_canvas_touch_shim(function (event) {
+		spz.client.ui.root.touch_move(event);
+		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_end = _callback_ui_canvas_touch_shim(function (event) {
+		spz.client.ui.root.touch_end(event);
+		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_cancel = _callback_ui_canvas_touch_shim(function (event) {
+		spz.client.ui.root.touch_cancel(event);
+		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_leave = _callback_ui_canvas_touch_shim(function (event) {
+		spz.client.ui.root.touch_leave(event);
 	});
 
 	var callback_ui_redraw = function () {
-		spz.client.ui.root.redraw(spz.client.ui.canvas_ctx);
+		if (spz.client.ui.root.redraw_necessary) {
+			spz.client.ui.root.redraw(spz.client.ui.canvas_ctx);
+		}
 	};
 
 	var callback_document_ready = function () {
