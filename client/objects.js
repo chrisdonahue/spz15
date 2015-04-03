@@ -12,10 +12,10 @@
 	spz.client.objects.bb_abs = ctor(function(prototype, _, _protected, __, __private) {
 		// public
 		prototype.init = function (x, y, width, height) {
-			this.x = x;
-			this.y = y;
-			this.width = width;
-			this.height = height;
+			this.x = x || 0;
+			this.y = y || 0;
+			this.width = width || 0;
+			this.height = height || 0;
 		};
 
 		prototype.set = function (x, y, width, height) {
@@ -43,10 +43,10 @@
 	spz.client.objects.bb_rel = ctor(function(prototype, _, _protected, __, __private) {
 		// public
 		prototype.init = function (x, y, width, height) {
-			this.x = x;
-			this.y = y;
-			this.width = width;
-			this.height = height;
+			this.x = x || 0.0;
+			this.y = y || 0.0;
+			this.width = width || 0.0;
+			this.height = height || 0.0;
 		};
 
 		prototype.inverse = function () {
