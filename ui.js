@@ -14,10 +14,6 @@
 	});
 
 	spz.client.views.base = component.subclass(function(prototype, _, _protected, __, __private) {
-		_protected.settings = {};
-		_protected.settings[spz.defines.orientation.landscape] = {};
-		_protected.settings[spz.defines.orientation.portrait] = {};
-
 		// public
 		prototype.init = function (bb) {
 			_(this).bb = bb || new spz.client.objects.bb_abs();
@@ -45,49 +41,52 @@
 	});
 
 	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		_protected.settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
+		__private.settings = {};
+		__private.settings[spz.defines.orientation.landscape] = {};
+		__private.settings[spz.defines.orientation.portrait] = {};
+		__private.settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
 			0.0,
 			0.0,
 			0.2,
 			1.0
 		);
-		_protected.settings[spz.defines.orientation.landscape].section = new spz.client.objects.bb_rel(
+		__private.settings[spz.defines.orientation.landscape].section = new spz.client.objects.bb_rel(
 			0.2,
 			0.0,
 			0.8,
 			1.0
 		);
-		_protected.settings[spz.defines.orientation.landscape].section_border = 0.02;
+		__private.settings[spz.defines.orientation.landscape].section_border = 0.02;
 
-		_protected.settings[spz.defines.orientation.portrait].nav = new spz.client.objects.bb_rel(
+		__private.settings[spz.defines.orientation.portrait].nav = new spz.client.objects.bb_rel(
 			0.0,
 			0.0,
 			1.0,
 			0.2
 		);
-		_protected.settings[spz.defines.orientation.portrait].section = new spz.client.objects.bb_rel(
+		__private.settings[spz.defines.orientation.portrait].section = new spz.client.objects.bb_rel(
 			0.0,
 			0.2,
 			1.0,
 			0.8
 		);
-		_protected.settings[spz.defines.orientation.portrait].section_border = 0.02;
+		__private.settings[spz.defines.orientation.portrait].section_border = 0.02;
 
 		prototype.init = function (bb) {
 			prototype.super.init.call(this, bb);
-			__(this).section_bb_recalculate();
-			//_(this).subviews[spz.defines.views.keyboard] = new spz.client.views.keyboard(__(this).section_bb);
+			__(this).section_bb_recalculate.call(this);
+			_(this).subviews[spz.defines.views.keyboard] = new spz.client.views.keyboard(__(this).section_bb);
 		};
 
 		prototype.bb_set = function (bb) {
 			prototype.super.bb_set.call(this, bb);
-			__(this).section_bb_recalculate();
-			//_(this).subviews[spz.defines.views.keyboard].bb_set(__(this).section_bb);
+			__(this).section_bb_recalculate.call(this);
+			_(this).subviews[spz.defines.views.keyboard].bb_set(__(this).section_bb);
 		};
 
 		prototype.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
-			var nav_bb = _(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
+			var nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
 			canvas_ctx.fillRect(nav_bb.x, nav_bb.y, nav_bb.width, nav_bb.height);
@@ -103,7 +102,7 @@
 		};
 
 		__private.section_bb_recalculate = function () {
-			var settings = _(this).settings[spz.client.ui.orientation];
+			var settings = __(this).settings[spz.client.ui.orientation];
 			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
 		};
 	});
