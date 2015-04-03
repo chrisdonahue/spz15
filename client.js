@@ -39,6 +39,8 @@
 	
 	$.extend(spz.client.ui, spz.client.options.ui);
 
+	spz.client.ui.orientation = spz.defines.orientation.landscape;
+
 
 	/*
 	helpers.ui.mouse_event_to_canvas_pos = function(event) {
@@ -111,7 +113,7 @@
 		spz.client.ui.canvas.width = spz.client.ui.width = browser_viewport_width;
 		spz.client.ui.canvas.height = spz.client.ui.height = browser_viewport_height;
 		spz.client.ui.orientation = spz.helpers.ui.orientation_get(browser_viewport_width, browser_viewport_height);
-		spz.client.ui.root.bounding_box_set(0, 0, browser_viewport_width, browser_viewport_height);
+		spz.client.ui.root.bb_set(new spz.client.objects.bb_abs(0, 0, browser_viewport_width, browser_viewport_height));
 		callback_ui_redraw();
 	};
 
