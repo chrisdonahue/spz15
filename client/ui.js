@@ -175,6 +175,10 @@
 				canvas_ctx.fillRect(0, nav_bb.height, bb.width, bb.height - nav_bb.height);
 			}
 
+			if (spz.client.resources.view_icons[spz.defines.views.keyboard].data !== null) {
+				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.defines.views.keyboard].data, 0, 0, 100, 100);
+			}
+
 			prototype.super.redraw.call(this, canvas_ctx);
 		};
 
