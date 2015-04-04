@@ -190,6 +190,21 @@
 	};
 
 	var callback_document_ready = function () {
+		// load SVG resources
+		for (var view_name in spz.defines.views) {
+			var view_id = spz.defines.views[view_name];
+			// hack for some weird Chrome closure bug...
+			var callback_done_generator = function (_view_id) {
+				return function (data) {
+					spz.client.resources.view_icons[_view_id].data = data;
+					callback_ui_redraw();
+				};
+			}
+			$.ajax({
+				url: spz.client.resources.view_icons[view_id].url
+			}).done(callback_done_generator(view_id));
+		}
+
 		// remove scrollbars
 		$('body').css({'overflow': 'hidden'});
 		

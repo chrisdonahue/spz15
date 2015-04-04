@@ -24,24 +24,49 @@
 	<script type="text/javascript" src="js_lib/canvg.js"></script>
 
 	<script type="text/javascript">
-		window.spz = {};
-		window.spz.client = {};
-		window.spz.client.options = {};
-		window.spz.client.options.ui = {};
-		window.spz.client.options.ui.keyboard = {};
-		window.spz.client.options.ui.keyboard.midi_note_number_lower = 60;
-		window.spz.client.options.ui.keyboard.midi_note_number_upper = 71;
-		
-		window.spz.client.ui = {};
-		
-		window.spz.server = {};
-		window.spz.server.options = {};
-		window.spz.server.options.ip = 'echo.websocket.org';
-		window.spz.server.options.port = 80;
+		(function () {
+			var spz = window.spz = {};
+
+			spz.defines = {
+				touch_id_mouse: 'mouse',
+				orientation: {
+					portrait: 'portrait',
+					landscape: 'landscape'
+				},
+				views: {
+					keyboard: 'keyboard',
+					envelope: 'envelope',
+					patch: 'patch',
+					output: 'output'
+				}
+			};
+
+			spz.client = {};
+			spz.client.options = {};
+			spz.client.options.ui = {};
+			spz.client.options.ui.keyboard = {};
+			spz.client.options.ui.keyboard.midi_note_number_lower = 60;
+			spz.client.options.ui.keyboard.midi_note_number_upper = 71;
+
+			spz.client.resources = {};
+			spz.client.resources.view_icons = {};
+			for (var view_name in spz.defines.views) {
+				var view_id = spz.defines.views[view_name];
+				spz.client.resources.view_icons[view_id] = {};
+				spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
+				spz.client.resources.view_icons[view_id].data = null;
+			}
+			
+			spz.client.ui = {};
+			
+			spz.server = {};
+			spz.server.options = {};
+			spz.server.options.ip = 'echo.websocket.org';
+			spz.server.options.port = 80;
+		})()
 	</script>
 
 	<script type="text/javascript" src="shim.js"></script>
-	<script type="text/javascript" src="defines.js"></script>
 	<script type="text/javascript" src="objects.js"></script>
 	<script type="text/javascript" src="helpers.js"></script>
 	<script type="text/javascript" src="server.js"></script>
