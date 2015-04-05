@@ -1,4 +1,4 @@
-(function (spz, fingerprint) {
+(function (spz, osc, fingerprint) {
 	spz.server = spz.server || {};
 	
 	spz.server.callbacks = spz.server.callbacks || {};
@@ -11,7 +11,7 @@
 		console.log('socket open');
 		
 		// send device fingerprint
-		spz.server.send(spz.client.fingerprint);
+		spz.server.socket.send(spz.client.fingerprint);
 	};
 	
 	spz.server.callbacks.close = function (event) {
@@ -26,12 +26,15 @@
 		console.log('socket error: ' + event.data);
 	};
 	
-	spz.server.send = function (message_type, parameters) {
-		var message_serialized = message_type.toString();
-		for (parameter in parameters) {
-			message_serialized += ' ' + parameter.toString();
-		}
-		spz.server.socket.send(message_serialized);
+	spz.server.osc_send = function (message_type, parameters) {
+		spz.server.socket_osc.send({
+			address: '/' + message_type,
+			args: [spz.client.fingerprint].concat(parameters)
+		});
+	};
+
+	spz.server.midi_note_number_on = function (midi_note_number) {
+		spz.server.osc_send('on', midi_note_number);
 	};
 
 	/*
@@ -44,6 +47,9 @@
 	try {
 		var server_uri = 'ws://' + String(spz.server.options.ip) + ':' + String(spz.server.options.port);
 		spz.server.socket = new WebSocket(server_uri);
+		spz.server.socket_osc = new osc.WebSocketPort({
+			socket: spz.server.socket
+		});
 	}
 	catch (e) {
 		alert('Could not connect to server. Try refreshing.');
@@ -55,4 +61,4 @@
 	spz.server.socket.onclose = spz.server.callbacks.close;
 	spz.server.socket.onmessage = spz.server.callbacks.message;
 	spz.server.socket.onerror = spz.server.callbacks.error;
-})(window.spz, window.Fingerprint);
+})(window.spz, window.osc, window.Fingerprint);
