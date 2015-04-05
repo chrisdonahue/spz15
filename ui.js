@@ -239,10 +239,10 @@
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
 					var midi_note_number_old = spz.client.control.touch_id_to_midi_note_number[touch_id];
 					if (midi_note_number_old !== midi_note_number) {
-						//helpers.client.midi_note_number_off(midi_note_number);
+						spz.server.midi_note_number_off(midi_note_number_old);
 						delete spz.client.control.midi_note_number_to_touch_id[midi_note_number_old];
 						delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-						//helpers.client.midi_note_number_on(midi_note_number);
+						spz.server.midi_note_number_on(midi_note_number);
 						spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
 						spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
 					}
@@ -255,7 +255,7 @@
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
 					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					//helpers.client.midi_note_number_off(midi_note_number);
+					spz.server.midi_note_number_off(midi_note_number);
 					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
 					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
 				}
@@ -267,7 +267,7 @@
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
 					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					//helpers.client.midi_note_number_off(midi_note_number);
+					spz.server.midi_note_number_off(midi_note_number);
 					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
 					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
 				}
@@ -279,7 +279,7 @@
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
 					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					//helpers.client.midi_note_number_off(midi_note_number);
+					spz.server.midi_note_number_off(midi_note_number);
 					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
 					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
 				}
