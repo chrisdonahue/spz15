@@ -17,8 +17,9 @@
 		// public
 		prototype.init = function (bb) {
 			_(this).bb = bb || new spz.client.objects.bb_abs();
-			_(this).subviews = {};
 			_(this).dirty = true;
+			__(this).subviews = {};
+			__(this).subviews_count = 0;
 		};
 
 		prototype.bb_set = function (bb) {
@@ -34,6 +35,9 @@
 		};
 
 		prototype.touch_start = function (event) {
+			for (subview_id in _(this).subviews) {
+				if (_(this).subviews[subview_id].contains(event.x
+			}
 		};
 
 		prototype.touch_move = function (event) {
@@ -72,6 +76,20 @@
 			// mark as clean
 			_(this).dirty = false;
 		};
+
+		_protected.subview_add = function (subview_id, subview) {
+			__(this).subviews[subview_id] = subview;
+			__(this).subviews_count++;
+		};
+
+		_protected.subview_remove = function (subview_id) {
+			delete __(this).subviews[subview_id];
+			__(this).subviews_count--;
+		};
+
+		_protected.subviews_count = function () {
+			return __(this).subviews_count;
+		};
 	});
 
 	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
@@ -109,13 +127,19 @@
 		prototype.init = function (bb) {
 			prototype.super.init.call(this, bb);
 			__(this).section_bb_recalculate.call(this);
-			_(this).subviews[spz.defines.views.keyboard] = new spz.client.views.keyboard(__(this).section_bb);
+			for (var subview_id in spz.defines.views_enabled) {
+				var subview_name = spz.defines.views_enabled[subview_id];
+				_(this).subviews[subview_name] = new spz.client.views[subview_name](__(this).section_bb);
+			}
 		};
 
 		prototype.bb_set = function (bb) {
 			prototype.super.bb_set.call(this, bb);
 			__(this).section_bb_recalculate.call(this);
-			_(this).subviews[spz.defines.views.keyboard].bb_set(__(this).section_bb);
+			for (var subview_id in spz.defines.views_enabled) {
+				var subview_name = spz.defines.views_enabled[subview_id];
+				_(this).subviews[subview_name].bb_set(__(this).section_bb);
+			}
 		};
 
 		prototype.touch_start = function (event) {
@@ -175,9 +199,11 @@
 				canvas_ctx.fillRect(0, nav_bb.height, bb.width, bb.height - nav_bb.height);
 			}
 
-			if (spz.client.resources.view_icons[spz.defines.views.keyboard].data !== null) {
-				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.defines.views.keyboard].data, 0, 0, 100, 100);
+			/*
+			if (spz.client.resources.view_icons[spz.defines.views_enabled.keyboard].data !== null) {
+				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.defines.views_enabled.keyboard].data, 0, 0, 100, 100);
 			}
+			*/
 
 			prototype.super.redraw.call(this, canvas_ctx);
 		};
@@ -188,7 +214,153 @@
 		};
 	});
 
-	spz.client.views.keyboard = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+	spz.client.views[spz.defines.views_available.envelope] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {
+		};
+
+		prototype.init = function (bb) {
+			prototype.super.init.call(this, bb);
+		};
+
+		prototype.bb_set = function (bb) {
+			prototype.super.bb_set.call(this, bb);
+		};
+
+		prototype.touch_start = function (event) {
+		};
+
+		prototype.touch_move = function (event) {
+		};
+
+		prototype.touch_end = function (event) {
+		};
+
+		prototype.touch_cancel = function (event) {
+		};
+
+		prototype.touch_leave = function (event) {
+		};
+
+		prototype.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			prototype.super.redraw.call(this, canvas_ctx);
+		};
+	});
+
+	spz.client.views[spz.defines.views_available.patch] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {
+		};
+
+		prototype.init = function (bb) {
+			prototype.super.init.call(this, bb);
+		};
+
+		prototype.bb_set = function (bb) {
+			prototype.super.bb_set.call(this, bb);
+		};
+
+		prototype.touch_start = function (event) {
+		};
+
+		prototype.touch_move = function (event) {
+		};
+
+		prototype.touch_end = function (event) {
+		};
+
+		prototype.touch_cancel = function (event) {
+		};
+
+		prototype.touch_leave = function (event) {
+		};
+
+		prototype.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = 'rgb(0, 255, 0)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			prototype.super.redraw.call(this, canvas_ctx);
+		};
+	});
+
+	spz.client.views[spz.defines.views_available.output] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {
+		};
+
+		prototype.init = function (bb) {
+			prototype.super.init.call(this, bb);
+		};
+
+		prototype.bb_set = function (bb) {
+			prototype.super.bb_set.call(this, bb);
+		};
+
+		prototype.touch_start = function (event) {
+		};
+
+		prototype.touch_move = function (event) {
+		};
+
+		prototype.touch_end = function (event) {
+		};
+
+		prototype.touch_cancel = function (event) {
+		};
+
+		prototype.touch_leave = function (event) {
+		};
+
+		prototype.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = 'rgb(0, 0, 255)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			prototype.super.redraw.call(this, canvas_ctx);
+		};
+	});
+
+	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {
+		};
+
+		prototype.init = function (bb) {
+			prototype.super.init.call(this, bb);
+		};
+
+		prototype.bb_set = function (bb) {
+			prototype.super.bb_set.call(this, bb);
+		};
+
+		prototype.touch_start = function (event) {
+		};
+
+		prototype.touch_move = function (event) {
+		};
+
+		prototype.touch_end = function (event) {
+		};
+
+		prototype.touch_cancel = function (event) {
+		};
+
+		prototype.touch_leave = function (event) {
+		};
+
+		prototype.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+
+			prototype.super.redraw.call(this, canvas_ctx);
+		};
+	});
+
+	/*
+	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
 			key_spacing: 0.02,
 			key_white_color: 'rgb(255, 255, 255)',
@@ -485,4 +657,5 @@
 			__(this).buffer_dirty = true;
 		};
 	});
+	*/
 })(window.spz, window.mozart);

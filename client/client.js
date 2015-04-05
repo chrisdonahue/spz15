@@ -38,7 +38,7 @@
 	*/
 	
 	$.extend(spz.client.ui, spz.client.options.ui);
-	spz.client.ui.view_current = spz.defines.views.keyboard;
+	spz.client.ui.view_current = spz.defines.views_available.keyboard;
 
 	spz.client.ui.orientation = spz.defines.orientation.landscape;
 
@@ -191,8 +191,8 @@
 
 	var callback_document_ready = function () {
 		// load SVG resources
-		for (var view_name in spz.defines.views) {
-			var view_id = spz.defines.views[view_name];
+		for (var view_name in spz.defines.views_enabled) {
+			var view_id = spz.defines.views_enabled[view_name];
 			// hack for some weird Chrome closure bug...
 			var callback_done_generator = function (_view_id) {
 				return function (data) {
