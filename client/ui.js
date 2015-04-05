@@ -224,7 +224,7 @@
 				var touch_id = touch.identifier;
 				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
 				if (!(midi_note_number in spz.client.control.midi_note_number_to_touch_id)) {
-					//helpers.client.midi_note_number_on(midi_note_number);
+					spz.server.midi_note_number_on(midi_note_number);
 					spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
 					spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
 				}
