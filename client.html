@@ -34,13 +34,25 @@
 					portrait: 'portrait',
 					landscape: 'landscape'
 				},
-				views: {
+				views_available: {
+					keyboard: 'keyboard',
+					envelope: 'envelope',
+					patch: 'patch',
+					output: 'output'
+				},
+				views_enabled: {
 					keyboard: 'keyboard',
 					envelope: 'envelope',
 					patch: 'patch',
 					output: 'output'
 				}
 			};
+
+			var count = 0;
+			for (var view_enabled_id in spz.defines.views_enabled) {
+				count++;
+			}
+			spz.defines.views_enabled_count = count;
 
 			spz.client = {};
 			spz.client.options = {};
@@ -51,8 +63,8 @@
 
 			spz.client.resources = {};
 			spz.client.resources.view_icons = {};
-			for (var view_name in spz.defines.views) {
-				var view_id = spz.defines.views[view_name];
+			for (var view_name in spz.defines.views_enabled) {
+				var view_id = spz.defines.views_enabled[view_name];
 				spz.client.resources.view_icons[view_id] = {};
 				spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
 				spz.client.resources.view_icons[view_id].data = null;
