@@ -4,10 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1 user-scalable=no">
 
-	<!--
     <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-	-->
 
     <title>Synthesizer Petting Zoo</title>
 	
@@ -16,33 +14,65 @@
 
 <body>
 	<div id="canvas">
-		<canvas id="piano"></canvas>
+		<canvas id="client_ui"></canvas>
 	</div>
 
-	<script type="text/javascript">
-		window.client_options = {};
-
-		window.client_options.client = {};
-		window.client_options.client.midi_note_velocity_initial = 100;
-
-		window.client_options.socket = {};
-		window.client_options.socket.server_ip = 'echo.websocket.org';
-		window.client_options.socket.server_port = 80;
-
-		window.client_options.ui = {}
-		window.client_options.ui.midi_note_number_display_lower_initial = 60;
-		window.client_options.ui.midi_note_number_display_upper_initial = 71;
-		window.client_options.ui.key_spacing = 0.02;
-		window.client_options.ui.key_white_color = 'rgb(255, 255, 255)';
-		window.client_options.ui.key_white_down_color = 'rgb(10, 46, 166)';
-		window.client_options.ui.key_white_outline = 'rgb(50, 50, 50)';
-		window.client_options.ui.key_black_color = 'rgb(0, 0, 0)';
-		window.client_options.ui.key_black_down_color = 'rgb(245, 209, 89)';
-		window.client_options.ui.key_black_outline = 'rgb(50, 50, 50)';
-	</script>
 	<script type="text/javascript" src="js_lib/jquery-1.11.2.min.js"></script>
+	<script type="text/javascript" src="js_lib/osc-browser.min.js"></script>
+	<script type="text/javascript" src="js_lib/private-parts.js"></script>
+	<script type="text/javascript" src="js_lib/mozart.js"></script>
 	<script type="text/javascript" src="js_lib/fingerprint.js"></script>
+	<script type="text/javascript" src="js_lib/canvg.js"></script>
+
+	<script type="text/javascript">
+		(function () {
+			var spz = window.spz = {};
+
+			spz.defines = {
+				touch_id_mouse: 'mouse',
+				orientation: {
+					portrait: 'portrait',
+					landscape: 'landscape'
+				},
+				views: {
+					keyboard: 'keyboard',
+					envelope: 'envelope',
+					patch: 'patch',
+					output: 'output'
+				}
+			};
+
+			spz.client = {};
+			spz.client.options = {};
+			spz.client.options.ui = {};
+			spz.client.options.ui.keyboard = {};
+			spz.client.options.ui.keyboard.midi_note_number_lower = 60;
+			spz.client.options.ui.keyboard.midi_note_number_upper = 71;
+
+			spz.client.resources = {};
+			spz.client.resources.view_icons = {};
+			for (var view_name in spz.defines.views) {
+				var view_id = spz.defines.views[view_name];
+				spz.client.resources.view_icons[view_id] = {};
+				spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
+				spz.client.resources.view_icons[view_id].data = null;
+			}
+			spz.client.resources.view_icons['keyboard'].url = 'http://upload.wikimedia.org/wikipedia/commons/0/02/SVG_logo.svg';
+			
+			spz.client.ui = {};
+			
+			spz.server = {};
+			spz.server.options = {};
+			spz.server.options.ip = 'cdonahue.me';
+			spz.server.options.port = 1234;
+		})()
+	</script>
+
 	<script type="text/javascript" src="shim.js"></script>
+	<script type="text/javascript" src="objects.js"></script>
+	<script type="text/javascript" src="helpers.js"></script>
+	<script type="text/javascript" src="server.js"></script>
+	<script type="text/javascript" src="ui.js"></script>
 	<script type="text/javascript" src="client.js"></script>
 </body>
 </html>

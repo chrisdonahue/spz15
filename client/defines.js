@@ -1,0 +1,2 @@
+(function (spz) {
+})(window.spz);
