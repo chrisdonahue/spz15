@@ -1,4 +1,4 @@
-(function (argc, argv, osc, WebSocket, dgram) {
+(function (argc, argv, WebSocket, dgram) {
 	// default arguments
 	var args = {
 		udp: {
@@ -48,4 +48,4 @@
 			}
 		});
 	});
-})(process.argv.length, process.argv, require('osc'), require('ws'), require('dgram'));
+})(process.argv.length, process.argv, require('ws'), require('dgram'));
