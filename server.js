@@ -9,9 +9,6 @@
 	
 	spz.server.callbacks.open = function (event) {
 		console.log('socket open');
-		
-		// send device fingerprint
-		spz.server.socket.send(spz.client.fingerprint);
 	};
 	
 	spz.server.callbacks.close = function (event) {
@@ -34,7 +31,11 @@
 	};
 
 	spz.server.midi_note_number_on = function (midi_note_number) {
-		spz.server.osc_send('on', midi_note_number);
+		spz.server.osc_send('on', [midi_note_number]);
+	};
+
+	spz.server.midi_note_number_off = function (midi_note_number) {
+		spz.server.osc_send('off', [midi_note_number]);
 	};
 
 	/*
@@ -46,9 +47,9 @@
 	
 	try {
 		var server_uri = 'ws://' + String(spz.server.options.ip) + ':' + String(spz.server.options.port);
-		spz.server.socket = new WebSocket(server_uri);
+		//spz.server.socket = new WebSocket(server_uri);
 		spz.server.socket_osc = new osc.WebSocketPort({
-			socket: spz.server.socket
+			url: server_uri
 		});
 	}
 	catch (e) {
@@ -57,8 +58,12 @@
 	}
 	
 	// register socket callbacks
-	spz.server.socket.onopen = spz.server.callbacks.open;
-	spz.server.socket.onclose = spz.server.callbacks.close;
-	spz.server.socket.onmessage = spz.server.callbacks.message;
-	spz.server.socket.onerror = spz.server.callbacks.error;
+	spz.server.socket_osc.on('open', spz.server.callbacks.open);
+	spz.server.socket_osc.on('close', spz.server.callbacks.close);
+	spz.server.socket_osc.on('message', spz.server.callbacks.message);
+	spz.server.socket_osc.on('error', spz.server.callbacks.error);
+
+	// open port
+	spz.server.socket_osc.open();
+
 })(window.spz, window.osc, window.Fingerprint);
