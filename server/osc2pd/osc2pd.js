@@ -38,13 +38,8 @@
 			console.log('new connection');
 		}
 
-		// create osc parser
-		var socket_osc = new osc.WebSocketPort({
-			socket: socket
-		});
-
 		// listen for messages on this socket, funnel to PD
-		socket_osc.on('message', function (message) {
+		socket.on('message', function (message) {
 			if (args.debug) {
 				console.log(message);
 			}
