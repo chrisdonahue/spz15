@@ -1,9 +1,12 @@
-(function (argc, argv, WebSocket, dgram) {
+(function (argc, argv, osc, WebSocket) {
 	// default arguments
 	var args = {
+		web_socket: {
+			port: 1234
+		},
 		udp: {
-			port: 1235,
-			ip: 'localhost'
+			address: 'localhost',
+			port: 1235
 		},
 		debug: false
 	}
@@ -24,12 +27,19 @@
 	}
 
 	// create web socket server
-	var web_socket_port = 1234;
-	var web_socket_server = new WebSocket.Server({ port: web_socket_port });
+	var web_socket_server = new WebSocket.Server({port: args.web_socket.port});
 
 	// udp settings
 	if ('udp' in args) {
-		var udp_client = dgram.createSocket('udp4');
+		// create udp client
+		var udp_client = new osc.UDPPort({
+			remoteAddress: args.udp.address,
+			remotePort: args.udp.port
+		});
+		udp_client.on('message', function (message) {
+			console.log('receieved message via UDP for some reason');
+		});
+		udp_client.open();
 	}
 	 
 	// listen for web socket connections
@@ -38,14 +48,20 @@
 			console.log('new connection');
 		}
 
+		// create osc parser
+		var socket_osc = new osc.WebSocketPort({
+			socket: socket
+		});
+
 		// listen for messages on this socket, funnel to PD
-		socket.on('message', function (message) {
+		socket_osc.on('message', function (message) {
 			if (args.debug) {
 				console.log(message);
 			}
 			if ('udp' in args) {
-				udp_client.send(message, 0, message.length, args.udp.port, args.udp.ip, function(err, bytes) {});
+				udp_client.send(message);
 			}
 		});
 	});
-})(process.argv.length, process.argv, require('ws'), require('dgram'));
+
+})(process.argv.length, process.argv, require('osc'), require('ws'));
