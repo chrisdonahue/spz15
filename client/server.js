@@ -31,7 +31,7 @@
 	};
 
 	spz.server.midi_note_number_on = function (midi_note_number) {
-		spz.server.osc_send('on', [midi_note_number]);
+		spz.server.osc_send('on', [midi_note_number, 127]);
 	};
 
 	spz.server.midi_note_number_off = function (midi_note_number) {
@@ -47,7 +47,6 @@
 	
 	try {
 		var server_uri = 'ws://' + String(spz.server.options.ip) + ':' + String(spz.server.options.port);
-		//spz.server.socket = new WebSocket(server_uri);
 		spz.server.socket_osc = new osc.WebSocketPort({
 			url: server_uri
 		});
