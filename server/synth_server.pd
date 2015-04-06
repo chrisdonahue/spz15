@@ -3,7 +3,7 @@
 #X obj 118 184 mtof~;
 #X obj 532 111 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#N canvas 170 122 1155 589 osc-parsing 1;
+#N canvas 428 36 1155 589 osc-parsing 1;
 #X obj 46 45 import mrpeach;
 #X obj 46 106 unpackOSC;
 #X obj 347 175 routeOSC /on;
@@ -13,10 +13,10 @@
 #X obj 637 550 routeOSC /attack;
 #X obj 766 269 routeOSC /release;
 #X obj 828 170 routeOSC /pan;
-#X obj 24 478 coll;
+#X obj 31 707 coll;
 #C restore;
-#X msg 26 339 dump;
-#X msg 141 349 123 0;
+#X msg 33 568 dump;
+#X msg 148 578 123 0;
 #X obj 946 170 routeOSC /lfo;
 #X obj 678 454 routeOSC /decay;
 #X obj 720 358 routeOSC /sustain;
@@ -55,14 +55,14 @@
 #X text 240 45 /disconnect clientID;
 #X obj 46 170 routeOSC /connect;
 #X obj 188 173 routeOSC /disconnect;
-#X obj 46 201 print con-clientID;
-#X obj 188 204 print dis-clientID;
-#X msg 95 348 222 1;
-#X msg 247 392 clear;
-#X msg 151 378 123;
-#X msg 115 375 222;
+#X obj 62 201 print con-clientID;
+#X obj 207 204 print dis-clientID;
+#X msg 102 577 222 1;
+#X msg 254 621 clear;
+#X msg 158 607 123;
+#X msg 122 604 222;
 #X obj 348 372 pack f f f;
-#X obj 24 504 s voice-ind;
+#X obj 46 468 s voice-ind;
 #X obj 348 340 r voice-ind;
 #X msg 372 194 123 60 100;
 #X obj 348 567 route 0 1;
@@ -72,7 +72,7 @@
 #X obj 348 704 s 0-trigger;
 #X obj 474 609 unpack;
 #X msg 374 218 222 65 110;
-#X text -2 295 this is for making a dictionary based on fingerprint
+#X text 10 537 this is for making a dictionary based on fingerprint
 to voice number;
 #X text 387 283 nn;
 #X text 424 283 vel;
@@ -93,7 +93,7 @@ to voice number;
 #X obj 494 353 pack f f;
 #X msg 507 196 123 60;
 #X msg 508 218 222 65;
-#X text 186 348 <-- DO THIS FIRST!!;
+#X text 193 577 <-- DO THIS FIRST!!;
 #X obj 501 681 s 1-notenum;
 #X obj 507 636 s 1-velocity;
 #X obj 474 699 s 1-trigger;
@@ -120,10 +120,22 @@ to voice number;
 #X msg 757 546 123 500;
 #X msg 758 569 222 0;
 #X obj 347 308 s on-get-voice;
-#X obj 75 326 r on-get-voice;
-#X obj 240 256 print checkit;
-#X obj 179 104 print fromchris;
+#X obj 60 260 r on-get-voice;
 #X obj 46 74 udpreceive 1235;
+#X obj 402 470 print nn;
+#X obj 426 409 print vel;
+#X obj 109 308 counter 9;
+#X obj 109 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 109 334 5 0 0 0 - - -;
+#X obj 46 365 pack f f;
+#X obj 46 436 coll;
+#C restore;
+#X msg 10 371 dump;
+#X obj 124 362 r on-get-voice;
+#X msg 124 385 clear;
+#X msg 188 229 remove \$1;
+#X obj 176 475 print coll-out;
 #X connect 1 0 2 0;
 #X connect 1 0 3 0;
 #X connect 1 0 5 0;
@@ -132,7 +144,6 @@ to voice number;
 #X connect 1 0 48 0;
 #X connect 1 0 49 0;
 #X connect 2 0 18 0;
-#X connect 2 0 115 0;
 #X connect 3 0 83 0;
 #X connect 5 0 6 0;
 #X connect 5 0 7 0;
@@ -141,7 +152,6 @@ to voice number;
 #X connect 6 0 108 0;
 #X connect 7 0 34 0;
 #X connect 8 0 36 0;
-#X connect 9 0 57 0;
 #X connect 10 0 9 0;
 #X connect 11 0 9 0;
 #X connect 12 0 15 0;
@@ -152,7 +162,9 @@ to voice number;
 #X connect 16 0 43 0;
 #X connect 18 0 113 0;
 #X connect 18 1 56 1;
+#X connect 18 1 116 0;
 #X connect 18 2 56 2;
+#X connect 18 2 117 0;
 #X connect 28 0 29 0;
 #X connect 28 1 30 0;
 #X connect 31 0 32 0;
@@ -166,7 +178,10 @@ to voice number;
 #X connect 43 0 44 0;
 #X connect 43 1 45 0;
 #X connect 48 0 50 0;
+#X connect 48 0 119 0;
+#X connect 48 0 121 0;
 #X connect 49 0 51 0;
+#X connect 49 0 126 0;
 #X connect 52 0 9 0;
 #X connect 53 0 9 0;
 #X connect 54 0 9 0;
@@ -209,8 +224,18 @@ to voice number;
 #X connect 108 1 106 1;
 #X connect 111 0 108 0;
 #X connect 112 0 108 0;
-#X connect 114 0 9 0;
-#X connect 117 0 116 0;
+#X connect 114 0 121 0;
+#X connect 115 0 1 0;
+#X connect 118 0 120 0;
+#X connect 119 0 118 0;
+#X connect 120 0 121 1;
+#X connect 121 0 122 0;
+#X connect 122 0 57 0;
+#X connect 122 0 127 0;
+#X connect 123 0 122 0;
+#X connect 124 0 122 0;
+#X connect 125 0 122 0;
+#X connect 126 0 122 0;
 #X restore 90 48 pd osc-parsing;
 #N canvas 240 87 1109 548 saw_sine 0;
 #X obj 95 107 osc~;
@@ -419,19 +444,19 @@ This patch is used as an abstraction in various examples.;
 #X obj 532 168 vsl 15 128 0 3000 0 0 0-attack 0-attack empty 0 -9 0
 10 -262144 -1 -1 0 1;
 #X obj 551 168 vsl 15 128 10 3000 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 1900 1;
 #X obj 591 168 vsl 15 128 10 3000 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 5800 1;
 #X obj 572 168 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 5500 1;
 #X text 532 149 A;
 #X text 552 150 D;
 #X text 573 150 S;
 #X text 592 151 R;
 #X obj 500 169 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 4100 1;
 #X obj 624 169 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 5200 1;
 #X text 623 150 pan;
 #X text 496 148 vel;
 #X obj 38 454 r pan;
@@ -503,9 +528,9 @@ This patch is used as an abstraction in various examples.;
 #X connect 11 0 0 1;
 #X restore -25 556 pd process;
 #X obj 433 173 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 1200 1;
 #X obj 455 173 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 1100 1;
 #X text 433 152 LFO;
 #X text -57 503 ignore this for now;
 #X obj 139 241 r 0-lfo-amount;
@@ -555,25 +580,25 @@ This patch is used as an abstraction in various examples.;
 #X obj 792 234 vsl 15 128 0 3000 0 0 1-attack 1-attack empty 0 -9 0
 10 -262144 -1 -1 0 1;
 #X obj 811 234 vsl 15 128 10 3000 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 3900 1;
 #X obj 851 234 vsl 15 128 10 3000 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 4400 1;
 #X obj 832 234 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 4200 1;
 #X text 792 215 A;
 #X text 812 216 D;
 #X text 833 216 S;
 #X text 852 217 R;
 #X obj 760 235 vsl 15 128 0 127 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 6900 1;
 #X obj 884 235 vsl 15 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 6900 1;
 #X text 883 216 pan;
 #X text 756 214 vel;
 #X obj 693 239 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 700 1;
 #X obj 715 239 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -262144
--1 -1 0 1;
+-1 -1 3100 1;
 #X text 693 218 LFO;
 #X msg 693 133 60;
 #X msg 721 133 61;
