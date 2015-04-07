@@ -327,7 +327,7 @@
 			__(this).settings.rounded_corner = 20;
 			__(this).settings.color = spz.helpers.ui.color_random();
 
-			this.event_on.call(this, 'touch_end', __(this).touch_end_callback);
+			this.event_on.call(this, 'touch_end', __(this).callback_touch_end);
 		};
 
 		prototype.bb_set = function (bb) {
@@ -351,7 +351,7 @@
 			}
 		};
 
-		__private.touch_end_callback = function () {
+		__private.callback_touch_end = function () {
 			__(this).parent.section_change(__(this).view_id);
 		};
 	});
@@ -431,31 +431,6 @@
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
-		};
-
-		prototype.init = function () {
-			this.super.init.call(this);
-		};
-
-		prototype.bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-		};
-
-		_protected.redraw = function (canvas_ctx) {
-			console.log('redraw keyboard');
-			var bb = _(this).bb;
-
-			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
-			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px Georgia';
-			canvas_ctx.textBaseline='top';
-			canvas_ctx.fillText('keyboard', bb.x, bb.y);
-		};
-	});
-
 	spz.client.views[spz.defines.views_available.sounds] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
 		};
@@ -481,8 +456,6 @@
 		};
 	});
 
-
-	/*
 	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
 			key_spacing: 0.02,
@@ -494,7 +467,6 @@
 			key_black_outline: 'rgb(50, 50, 50)'
 		};
 
-		// public methods
 		prototype.init = function () {
 			this.super.init.call(this);
 			__(this).midi_note_number_to_bb = {};
@@ -504,6 +476,12 @@
 			__(this).buffer.width = _(this).bb.width;
 			__(this).buffer.height = _(this).bb.height;
 			__(this).buffer_ctx = __(this).buffer.getContext('2d');
+
+			this.event_on.call(this, 'touch_start', __(this).callback_touch_start);
+			this.event_on.call(this, 'touch_move', __(this).callback_touch_move);
+			this.event_on.call(this, 'touch_end', __(this).callback_touch_end);
+			this.event_on.call(this, 'touch_leave', __(this).callback_touch_leave);
+			this.event_on.call(this, 'touch_cancel', __(this).callback_touch_cancel);
 		};
 
 		prototype.bb_set = function (bb) {
@@ -513,113 +491,9 @@
 			__(this).recalc_midi_note_number_to_bb.call(this);
 		};
 
-		prototype.touch_start = function (event) {
-			for (var i = 0; i < event.changedTouches.length; i++) {
-				var touch = event.changedTouches[i];
-				var touch_id = touch.identifier;
-				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
-				if (!(midi_note_number in spz.client.control.midi_note_number_to_touch_id)) {
-					spz.server.midi_note_number_on(midi_note_number);
-					spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
-					spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
-				}
-			}
-		};
+		_protected.redraw = function (canvas_ctx) {
+			console.log('redraw keyboard');
 
-		prototype.touch_move = function (event) {
-			for (var i = 0; i < event.changedTouches.length; i++) {
-				var touch = event.changedTouches[i];
-				var touch_id = touch.identifier;
-				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number_old = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					if (midi_note_number_old !== midi_note_number) {
-						spz.server.midi_note_number_off(midi_note_number_old);
-						delete spz.client.control.midi_note_number_to_touch_id[midi_note_number_old];
-						delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-						spz.server.midi_note_number_on(midi_note_number);
-						spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
-						spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
-					}
-				}
-			}
-		};
-
-		prototype.touch_end = function (event) {
-			for (var i = 0; i < event.changedTouches.length; i++) {
-				var touch_id = event.changedTouches[i].identifier;
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					spz.server.midi_note_number_off(midi_note_number);
-					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
-					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-				}
-			}
-		};
-
-		prototype.touch_cancel = function (event) {
-			for (var i = 0; i < event.changedTouches.length; i++) {
-				var touch_id = event.changedTouches[i].identifier;
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					spz.server.midi_note_number_off(midi_note_number);
-					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
-					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-				}
-			}
-		};
-
-		prototype.touch_leave = function (event) {
-			for (var i = 0; i < event.changedTouches.length; i++) {
-				var touch_id = event.changedTouches[i].identifier;
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
-					spz.server.midi_note_number_off(midi_note_number);
-					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
-					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-				}
-			}
-		};
-
-		__private.touch_to_midi_note_number = function (touch) {
-			var bb = _(this).bb;
-			var x = touch.clientX - bb.x;
-			var y = touch.clientY - bb.y;
-
-			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
-			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
-
-			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
-
-			// try black keys
-			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
-				if (spz.helpers.midi.note_number_key_white_is(midi_note_number)) {
-					continue;
-				}
-
-				var bb = midi_note_number_to_bb[midi_note_number];
-				if (bb.contains(x, y)) {
-					return midi_note_number;
-				}
-			}
-
-			// try white keys
-			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
-				if (spz.helpers.midi.note_number_key_black_is(midi_note_number)) {
-					continue;
-				}
-
-				var bb = midi_note_number_to_bb[midi_note_number];
-				if (bb.contains(x, y)) {
-					return midi_note_number;
-				}
-			}
-
-			// no note pressed (this shouldn't happen)
-			return null;
-		};
-
-		prototype.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
 			var settings = __(this).settings;
 
@@ -717,7 +591,117 @@
 			}
 		};
 
-		// private methods
+		__private.callback_touch_start = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch = event.changedTouches[i];
+				var touch_id = touch.identifier;
+				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
+				if (!(midi_note_number in spz.client.control.midi_note_number_to_touch_id)) {
+					spz.server.midi_note_number_on(midi_note_number);
+					spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
+					spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
+					_(this).dirty = true;
+				}
+			}
+		};
+
+		__private.callback_touch_move = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch = event.changedTouches[i];
+				var touch_id = touch.identifier;
+				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number_old = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					if (midi_note_number_old !== midi_note_number) {
+						spz.server.midi_note_number_off(midi_note_number_old);
+						delete spz.client.control.midi_note_number_to_touch_id[midi_note_number_old];
+						delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+						spz.server.midi_note_number_on(midi_note_number);
+						spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
+						spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
+						_(this).dirty = true;
+					}
+				}
+			}
+		};
+
+		__private.callback_touch_end = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch_id = event.changedTouches[i].identifier;
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					spz.server.midi_note_number_off(midi_note_number);
+					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
+					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+					_(this).dirty = true;
+				}
+			}
+		};
+
+		__private.callback_touch_leave = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch_id = event.changedTouches[i].identifier;
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					spz.server.midi_note_number_off(midi_note_number);
+					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
+					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+					_(this).dirty = true;
+				}
+			}
+		};
+
+		__private.callback_touch_cancel = function (event) {
+			for (var i = 0; i < event.changedTouches.length; i++) {
+				var touch_id = event.changedTouches[i].identifier;
+				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
+					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+					spz.server.midi_note_number_off(midi_note_number);
+					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
+					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+					_(this).dirty = true;
+				}
+			}
+		};
+
+		__private.touch_to_midi_note_number = function (touch) {
+			var bb = _(this).bb;
+			var x = touch.clientX - bb.x;
+			var y = touch.clientY - bb.y;
+
+			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
+			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
+
+			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
+
+			// try black keys
+			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
+				if (spz.helpers.midi.note_number_key_white_is(midi_note_number)) {
+					continue;
+				}
+
+				var bb = midi_note_number_to_bb[midi_note_number];
+				if (bb.contains(x, y)) {
+					return midi_note_number;
+				}
+			}
+
+			// try white keys
+			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
+				if (spz.helpers.midi.note_number_key_black_is(midi_note_number)) {
+					continue;
+				}
+
+				var bb = midi_note_number_to_bb[midi_note_number];
+				if (bb.contains(x, y)) {
+					return midi_note_number;
+				}
+			}
+
+			// no note pressed (this shouldn't happen)
+			return null;
+		};
+
 		__private.recalc_midi_note_number_to_bb = function () {
 			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
 			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
@@ -780,5 +764,5 @@
 			__(this).buffer_dirty = true;
 		};
 	});
-	*/
+
 })(window.spz, window.mozart);
