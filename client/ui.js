@@ -14,18 +14,74 @@
 	});
 
 	spz.client.views.canvas = component.subclass(function(prototype, _, _protected, __, __private) {
-		prototype.init = function (canvas_id) {
-			__(this).canvas = document.getElementById(canvas_id);
-			__(this).canvas_ctx = __(this).canvas.getContext('2d');
-			__(this).root = new spz.client.views.root();
+		prototype.init = function (canvas_id, root_type) {
+			// canvas
+			var canvas = __(this).canvas = document.getElementById(canvas_id);
+			__(this).canvas_ctx = canvas.getContext('2d');
+
+			// root view
+			var root = __(this).root = new root_type();
+			__(this).root_bb = new spz.client.objects.bb_abs();
+
+			// event handling
+			if (window.supports_touch_events) {
+				var event_touch_shim = function (callback) {
+					return function (event) {
+						if (!('changedTouches' in event)) {
+							event = event.originalEvent;
+						}
+						callback(event);
+						root.redraw();
+					}
+				};
+
+				canvas.ontouchstart = event_touch_shim(root.event_callback_get('touch_start'));
+				canvas.ontouchmove = event_touch_shim(root.event_callback_get('touch_move'));
+				canvas.ontouchend = event_touch_shim(root.event_callback_get('touch_end'));
+				canvas.ontouchleave = event_touch_shim(root.event_callback_get('touch_leave'));
+				canvas.ontouchcancel = event_touch_shim(root.event_callback_get('touch_cancel'));
+			}
+			else {
+				var event_mouse_to_touch_shim = function (callback) {
+					return function(event) {
+						event.changesTouches = [];
+						event.changedTouches.push({
+							clientX: event.clientX || -1,
+							clientY: event.clientY || -1
+							identifier: spz.defines.touch_id_mouse
+						});
+						callback(event);
+						root.redraw();
+					};
+				}
+
+				canvas.onmousedown = event_mouse_to_touch_shim(root.event_callback_get('touch_start'));
+				canvas.onmousemove = event_mouse_to_touch_shim(root.event_callback_get('touch_move'));
+				canvas.onmouseup = event_mouse_to_touch_shim(root.event_callback_get('touch_end'));
+				canvas.onmouseleave = event_mouse_to_touch_shim(root.event_callback_get('touch_leave'));
+			}
+		};
+
+		prototype.resize = function (width, height) {
+			// change canvas width
+			var canvas = __(this).canvas;
+			canvas.width = width;
+			canvas.height = height;
+
+			// change root nood width
+			__(this).root_bb.width = width;
+			__(this).root_bb.height = height;
+			__(this).root.bb_set(__(this).root_bb);
 		};
 
 		prototype.canvas_context_2d_get = function () {
 			return __(this).canvas_ctx;
 		};
 
-		prototype.on = function (event_type, handler) {
-			__(this).canvas['on' + event_type] = handler;
+		prototype.event_enable = function (event_type) {
+			__(this).canvas['on' + event_type] = function () {
+				callback;
+			}
 		};
 	});
 
@@ -35,11 +91,12 @@
 			_(this).dirty = true;
 			__(this).subviews = {};
 			__(this).subviews_count = 0;
-			__(this).event_handlers = __(this).event_handlers || {};
+			__(this).event_callbacks = __(this).event_callbacks || {};
 		};
 
 		prototype.bb_set = function (bb) {
 			_(this).bb = bb || new spz.client.objects.bb_abs();
+			_(this).dirty = true;
 		};
 		
 		prototype.bb_get = function (bb) {
@@ -50,16 +107,25 @@
 			return _(this).bb.contains(x, y);
 		};
 
-		prototype.on = function (event_type, handler) {
-			__(this).event_handlers[event_type] = handler;
+		prototype.event_on = function (event_type, callback) {
+			__(this).event_callbacks[event_type] = callback;
 		};
 
-		prototype.off = function (event_type) {
-			delete __(this).event_handlers[event_type];
+		prototype.event_off = function (event_type) {
+			delete __(this).event_callbacks[event_type];
+		};
+
+		prototype.event_callback_get = function (event_type) {
+			if (event_type in __(that).event_callbacks) {
+				return __(this).event_callbacks[event_type];
+			}
+			else {
+				return null;
+			}
 		};
 
 		prototype.event_occurred = function (event_type, event) {
-			// call handler on subviews if intersects
+			// call callback on subviews if intersects
 			for (var subview_id in __(this).subviews) {
 				var subview = __(this).subviews[subview_id];
 				var touch_event = event.changedTouches[0];
@@ -68,10 +134,10 @@
 				}
 			}
 
-			// call this view's handler if required
-			var event_handlers = __(this).event_handlers;
-			if (event_type in event_handlers && !event.isPropagationStopped()) {
-				event_handlers[event_type](event);
+			// call this view's callback if required
+			var event_callbacks = __(this).event_callbacks;
+			if (event_type in event_callbacks && !event.isPropagationStopped()) {
+				event_callbacks[event_type].call(this, (event));
 			}
 		};
 
@@ -167,7 +233,7 @@
 			__(this).sections_cache = {};
 			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
 				var view_id = spz.client.ui.views_enabled[i];
-				_(this).subview_add.call(this, 'nav_button_' + view_id, new spz.client.views.nav_button(view_id));
+				_(this).subview_add.call(this, 'nav_button_' + view_id, new spz.client.views.nav_button(this, view_id));
 				__(this).sections_cache[view_id] = new spz.client.views[view_id]();
 			}
 
@@ -215,6 +281,13 @@
 			}
 		};
 
+		prototype.section_change = function (section_new) {
+			_(this).subview_remove.call(this, 'section_' + spz.client.view_current);
+			spz.client.ui.view_current = section_new;
+			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
+			_(this).dirty = true;
+		};
+
 		_protected.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
 			var nav_bb = __(this).nav_bb;
@@ -235,20 +308,23 @@
 			}
 			*/
 		};
-
-		__private.section_change = function (section_new) {
-			_(this).subview_remove.call(this, 'section_' + spz.client.view_current);
-			spz.client.ui.view_current = section_new;
-			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
-		};
 	});
 
 	spz.client.views.nav_button = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
+			rounded_corner: 20
 		};
 
-		prototype.init = function (view_id) {
+		prototype.init = function (parent, view_id) {
 			this.super.init.call(this);
+
+			__(this).parent = parent;
+			__(this).view_id = view_id;
+			this.event_on.call(this, 'touch_end', __(this).touch_end_callback);
+		};
+
+		__private.touch_end_callback = function () {
+			__(this).parent.section_change(__(this).view_id);
 		};
 
 		prototype.bb_set = function (bb) {
@@ -259,7 +335,7 @@
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = spz.helpers.ui.color_random();
-			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, 5).fill();
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
 		};
 	});
 
@@ -286,6 +362,7 @@
 
 	spz.client.views[spz.defines.views_available.patch] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
+
 		};
 
 		prototype.init = function () {
@@ -346,6 +423,28 @@
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
+
+	spz.client.views[spz.defines.views_available.sounds] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {
+		};
+
+		prototype.init = function () {
+			this.super.init.call(this);
+		};
+
+		prototype.bb_set = function (bb) {
+			this.super.bb_set.call(this, bb);
+		};
+
+		_protected.redraw = function (canvas_ctx) {
+			console.log('sounds');
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+		};
+	});
+
 
 	/*
 	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
