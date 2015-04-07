@@ -201,6 +201,44 @@
 		};
 	});
 
+	var button_text = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {};
+		__private.settings.rounded_corner = 20;
+
+		prototype.init = function (text) {
+			this.super.init.call(this);
+			__(this).text = text;
+		};
+
+		_protected.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+			var text = __(this).text;
+
+			// draw button
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
+
+			// text options
+			canvas_ctx.fillStyle = 'rgb(255, 255, 255)';
+			canvas_ctx.textBaseline = 'middle';
+			canvas_ctx.textAlign = 'center';
+
+			// fit text
+			var text_height = bb.height * 0.8;
+			canvas_ctx.font = text_height.toString() + 'pt monospace';
+			var text_width = canvas_ctx.measureText(text).width;
+			var max_width = bb.width * 0.8;
+			while (text_width > max_width) {
+				text_height *= 0.8;
+				canvas_ctx.font = text_height.toString() + 'pt monospace';
+				text_width = canvas_ctx.measureText(text).width;
+			}
+
+			// draw text
+			canvas_ctx.fillText(__(this).text, bb.x + (bb.width / 2), bb.y + (bb.height / 2));
+		};
+	});
+
 	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {};
 		__private.settings[spz.defines.orientation.landscape] = {};
@@ -375,7 +413,7 @@
 			canvas_ctx.fillStyle = 'rgb(255, 255, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px Georgia';
+			canvas_ctx.font='30px monospace';
 			canvas_ctx.textBaseline='top';
 			canvas_ctx.fillText('envelope', bb.x, bb.y);
 		};
@@ -400,7 +438,7 @@
 			canvas_ctx.fillStyle = 'rgb(255, 0, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px Georgia';
+			canvas_ctx.font='30px monospace';
 			canvas_ctx.textBaseline='top';
 			canvas_ctx.fillText('patch', bb.x, bb.y);
 		};
@@ -425,7 +463,7 @@
 			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px Georgia';
+			canvas_ctx.font='30px monospace';
 			canvas_ctx.textBaseline='top';
 			canvas_ctx.fillText('output', bb.x, bb.y);
 		};
@@ -450,13 +488,62 @@
 			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px Georgia';
+			canvas_ctx.font='30px monospace';
 			canvas_ctx.textBaseline='top';
 			canvas_ctx.fillText('sounds', bb.x, bb.y);
 		};
 	});
 
 	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {};
+
+		__private.settings.controls = {};
+		__private.settings.controls.bb = new spz.client.objects.bb_rel(
+			0.0,
+			0.0,
+			1.0,
+			0.2
+		);
+		__private.settings.piano = new spz.client.objects.bb_rel(
+			0.0,
+			0.2,
+			1.0,
+			0.8
+		);
+
+		prototype.init = function () {
+			this.super.init.call(this);
+			_(this).subview_add.call(this, 'octave_down', new button_text('+'));
+			_(this).subview_add.call(this, 'octave_up', new button_text('+'));
+			_(this).subview_add.call(this, 'zoom_in', new button_text('-'));
+			_(this).subview_add.call(this, 'zoom_out', new button_text('+'));
+			_(this).subview_add.call(this, 'piano', new spz.client.views.piano());
+		};
+
+		prototype.bb_set = function (bb) {
+			this.super.bb_set.call(this, bb);
+			var settings = __(this).settings;
+			var bb_controls = settings.controls.bb.to_abs(bb);
+			var bb_piano = settings.piano.to_abs(bb);
+
+			_(this).subview_get.call(this, 'piano').bb_set(bb_piano);
+			_(this).subview_get.call(this, 'octave_down').bb_set(bb_controls);
+		};
+
+		_protected.redraw = function (canvas_ctx) {
+			console.log('redraw sounds');
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.font='30px monospace';
+			canvas_ctx.textBaseline='top';
+			canvas_ctx.fillText('keyboard', bb.x, bb.y);
+		};
+	});
+
+	spz.client.views.piano = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
 			key_spacing: 0.02,
 			key_white_color: 'rgb(255, 255, 255)',

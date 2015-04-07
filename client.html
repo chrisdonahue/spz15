@@ -24,58 +24,14 @@
 	<script type="text/javascript" src="js_lib/fingerprint.js"></script>
 
 	<script type="text/javascript">
-		(function () {
-			var spz = window.spz = {};
-
-			spz.defines = {
-				touch_id_mouse: 'mouse',
-				orientation: {
-					portrait: 'portrait',
-					landscape: 'landscape'
-				},
-				views_available: {
-					keyboard: 'keyboard',
-					envelope: 'envelope',
-					patch: 'patch',
-					sounds: 'sounds',
-					output: 'output'
-				}
-			};
-			var views_available = spz.defines.views_available;
-
-			spz.client = {};
-			spz.client.options = {};
-			spz.client.options.ui = {};
-			spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
-			spz.client.options.ui.view_current = views_available.keyboard;
-			spz.client.options.ui.keyboard = {};
-			spz.client.options.ui.keyboard.midi_note_number_lower = 60;
-			spz.client.options.ui.keyboard.midi_note_number_upper = 60 + 12 + 11;
-
-			spz.client.resources = {};
-			spz.client.resources.view_icons = {};
-			for (var i = 0; i < spz.client.options.ui.views_enabled.length; i++) {
-				var view_id = spz.client.options.ui.views_enabled[i];
-				spz.client.resources.view_icons[view_id] = {};
-				//spz.client.resources.view_icons[view_id].url = 'http://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg';
-				spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
-				spz.client.resources.view_icons[view_id].data = null;
-				spz.client.resources.view_icons[view_id].image = null;
-			}
-			
-			spz.client.ui = {};
-			
-			spz.server = {};
-			spz.server.options = {};
-			spz.server.options.ip = 'cdonahue.me';
-			spz.server.options.port = 1234;
-		})()
 	</script>
 
 	<script type="text/javascript" src="shim.js"></script>
+
+	<script type="text/javascript" src="config.js"></script>
+	<script type="text/javascript" src="server.js"></script>
 	<script type="text/javascript" src="objects.js"></script>
 	<script type="text/javascript" src="helpers.js"></script>
-	<script type="text/javascript" src="server.js"></script>
 	<script type="text/javascript" src="ui.js"></script>
 	<script type="text/javascript" src="client.js"></script>
 </body>
