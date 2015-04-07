@@ -13,17 +13,33 @@
 		};
 	});
 
+	spz.client.views.canvas = component.subclass(function(prototype, _, _protected, __, __private) {
+		prototype.init = function (canvas_id) {
+			__(this).canvas = document.getElementById(canvas_id);
+			__(this).canvas_ctx = __(this).canvas.getContext('2d');
+			__(this).root = new spz.client.views.root();
+		};
+
+		prototype.canvas_context_2d_get = function () {
+			return __(this).canvas_ctx;
+		};
+
+		prototype.on = function (event_type, handler) {
+			__(this).canvas['on' + event_type] = handler;
+		};
+	});
+
 	spz.client.views.base = component.subclass(function(prototype, _, _protected, __, __private) {
-		// public
-		prototype.init = function (bb) {
-			_(this).bb = bb || new spz.client.objects.bb_abs();
+		prototype.init = function () {
+			_(this).bb = new spz.client.objects.bb_abs();
 			_(this).dirty = true;
 			__(this).subviews = {};
 			__(this).subviews_count = 0;
+			__(this).event_handlers = __(this).event_handlers || {};
 		};
 
 		prototype.bb_set = function (bb) {
-			_(this).bb = bb;
+			_(this).bb = bb || new spz.client.objects.bb_abs();
 		};
 		
 		prototype.bb_get = function (bb) {
@@ -34,22 +50,29 @@
 			return _(this).bb.contains(x, y);
 		};
 
-		prototype.touch_start = function (event) {
-			for (subview_id in _(this).subviews) {
-				if (_(this).subviews[subview_id].contains(event.x
+		prototype.on = function (event_type, handler) {
+			__(this).event_handlers[event_type] = handler;
+		};
+
+		prototype.off = function (event_type) {
+			delete __(this).event_handlers[event_type];
+		};
+
+		prototype.event_occurred = function (event_type, event) {
+			// call handler on subviews if intersects
+			for (var subview_id in __(this).subviews) {
+				var subview = __(this).subviews[subview_id];
+				var touch_event = event.changedTouches[0];
+				if (subview.contains(touch_event.clientX, touch_event.clientY)) {
+					subview.event_occurred(event_type, event);
+				}
 			}
-		};
 
-		prototype.touch_move = function (event) {
-		};
-
-		prototype.touch_end = function (event) {
-		};
-
-		prototype.touch_cancel = function (event) {
-		};
-
-		prototype.touch_leave = function (event) {
+			// call this view's handler if required
+			var event_handlers = __(this).event_handlers;
+			if (event_type in event_handlers && !event.isPropagationStopped()) {
+				event_handlers[event_type](event);
+			}
 		};
 
 		prototype.redraw_necessary = function () {
@@ -73,13 +96,26 @@
 				}
 			}
 
-			// mark as clean
-			_(this).dirty = false;
+			// redraw this
+			if (_(this).dirty) {
+				// redraw
+				_(this).redraw.call(this, canvas_ctx);
+
+				// mark as clean
+				_(this).dirty = false;
+			}
+		};
+
+		_protected.redraw = function (canvas_ctx) {
 		};
 
 		_protected.subview_add = function (subview_id, subview) {
 			__(this).subviews[subview_id] = subview;
 			__(this).subviews_count++;
+		};
+
+		_protected.subview_get = function (subview_id) {
+			return __(this).subviews[subview_id];
 		};
 
 		_protected.subview_remove = function (subview_id) {
@@ -124,70 +160,32 @@
 		);
 		__private.settings[spz.defines.orientation.portrait].section_border = 0.02;
 
-		prototype.init = function (bb) {
-			prototype.super.init.call(this, bb);
-			__(this).section_bb_recalculate.call(this);
+		prototype.init = function () {
+			this.super.init.call(this);
+
 			for (var subview_id in spz.defines.views_enabled) {
 				var subview_name = spz.defines.views_enabled[subview_id];
-				_(this).subviews[subview_name] = new spz.client.views[subview_name](__(this).section_bb);
+				_(this).subview_add.call(this, subview_id, new spz.client.views[subview_name]());
 			}
 		};
 
 		prototype.bb_set = function (bb) {
-			prototype.super.bb_set.call(this, bb);
-			__(this).section_bb_recalculate.call(this);
+			this.super.bb_set.call(this, bb);
+
+			var settings = __(this).settings[spz.client.ui.orientation];
+			__(this).nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
+			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
+
 			for (var subview_id in spz.defines.views_enabled) {
 				var subview_name = spz.defines.views_enabled[subview_id];
-				_(this).subviews[subview_name].bb_set(__(this).section_bb);
+				var subview = _(this).subview_get.call(this, subview_name);
+				subview.bb_set(__(this).section_bb);
 			}
 		};
 
-		prototype.touch_start = function (event) {
-			var view_current = _(this).subviews[spz.client.ui.view_current];
-			var touch_event = event.changedTouches[0];
-			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
-				view_current.touch_start(event);
-			}
-		};
-
-		prototype.touch_move = function (event) {
-			var view_current = _(this).subviews[spz.client.ui.view_current];
-			var touch_event = event.changedTouches[0];
-			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
-				view_current.touch_move(event);
-			}
-		};
-
-		prototype.touch_end = function (event) {
-			var view_current = _(this).subviews[spz.client.ui.view_current];
-			var touch_event = event.changedTouches[0];
-			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
-				view_current.touch_end(event);
-			}
-			else {
-				// change view
-			}
-		};
-
-		prototype.touch_cancel = function (event) {
-			var view_current = _(this).subviews[spz.client.ui.view_current];
-			var touch_event = event.changedTouches[0];
-			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
-				view_current.touch_cancel(event);
-			}
-		};
-
-		prototype.touch_leave = function (event) {
-			var view_current = _(this).subviews[spz.client.ui.view_current];
-			var touch_event = event.changedTouches[0];
-			if (view_current.contains(touch_event.clientX, touch_event.clientY)) {
-				view_current.touch_leave(event);
-			}
-		};
-
-		prototype.redraw = function (canvas_ctx) {
+		_protected.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
-			var nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
+			var nav_bb = __(this).nav_bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
 			canvas_ctx.fillRect(nav_bb.x, nav_bb.y, nav_bb.width, nav_bb.height);
@@ -204,13 +202,6 @@
 				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.defines.views_enabled.keyboard].data, 0, 0, 100, 100);
 			}
 			*/
-
-			prototype.super.redraw.call(this, canvas_ctx);
-		};
-
-		__private.section_bb_recalculate = function () {
-			var settings = __(this).settings[spz.client.ui.orientation];
-			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
 		};
 	});
 
@@ -218,35 +209,19 @@
 		__private.settings = {
 		};
 
-		prototype.init = function (bb) {
-			prototype.super.init.call(this, bb);
+		prototype.init = function () {
+			this.super.init.call(this);
 		};
 
 		prototype.bb_set = function (bb) {
-			prototype.super.bb_set.call(this, bb);
+			this.super.bb_set.call(this, bb);
 		};
 
-		prototype.touch_start = function (event) {
-		};
-
-		prototype.touch_move = function (event) {
-		};
-
-		prototype.touch_end = function (event) {
-		};
-
-		prototype.touch_cancel = function (event) {
-		};
-
-		prototype.touch_leave = function (event) {
-		};
-
-		prototype.redraw = function (canvas_ctx) {
+		_protected.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			prototype.super.redraw.call(this, canvas_ctx);
 		};
 	});
 
@@ -254,35 +229,19 @@
 		__private.settings = {
 		};
 
-		prototype.init = function (bb) {
-			prototype.super.init.call(this, bb);
+		prototype.init = function () {
+			this.super.init.call(this);
 		};
 
 		prototype.bb_set = function (bb) {
-			prototype.super.bb_set.call(this, bb);
+			this.super.bb_set.call(this, bb);
 		};
 
-		prototype.touch_start = function (event) {
-		};
-
-		prototype.touch_move = function (event) {
-		};
-
-		prototype.touch_end = function (event) {
-		};
-
-		prototype.touch_cancel = function (event) {
-		};
-
-		prototype.touch_leave = function (event) {
-		};
-
-		prototype.redraw = function (canvas_ctx) {
+		_protected.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 255, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			prototype.super.redraw.call(this, canvas_ctx);
 		};
 	});
 
@@ -290,35 +249,19 @@
 		__private.settings = {
 		};
 
-		prototype.init = function (bb) {
-			prototype.super.init.call(this, bb);
+		prototype.init = function () {
+			this.super.init.call(this);
 		};
 
 		prototype.bb_set = function (bb) {
-			prototype.super.bb_set.call(this, bb);
+			this.super.bb_set.call(this, bb);
 		};
 
-		prototype.touch_start = function (event) {
-		};
-
-		prototype.touch_move = function (event) {
-		};
-
-		prototype.touch_end = function (event) {
-		};
-
-		prototype.touch_cancel = function (event) {
-		};
-
-		prototype.touch_leave = function (event) {
-		};
-
-		prototype.redraw = function (canvas_ctx) {
+		_protected.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 0, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			prototype.super.redraw.call(this, canvas_ctx);
 		};
 	});
 
@@ -326,36 +269,19 @@
 		__private.settings = {
 		};
 
-		prototype.init = function (bb) {
-			prototype.super.init.call(this, bb);
+		prototype.init = function () {
+			this.super.init.call(this);
 		};
 
 		prototype.bb_set = function (bb) {
-			prototype.super.bb_set.call(this, bb);
+			this.super.bb_set.call(this, bb);
 		};
 
-		prototype.touch_start = function (event) {
-		};
-
-		prototype.touch_move = function (event) {
-		};
-
-		prototype.touch_end = function (event) {
-		};
-
-		prototype.touch_cancel = function (event) {
-		};
-
-		prototype.touch_leave = function (event) {
-		};
-
-		prototype.redraw = function (canvas_ctx) {
+		_protected.redraw = function (canvas_ctx) {
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-
-			prototype.super.redraw.call(this, canvas_ctx);
 		};
 	});
 
@@ -372,8 +298,8 @@
 		};
 
 		// public methods
-		prototype.init = function (bb) {
-			prototype.super.init.call(this, bb);
+		prototype.init = function () {
+			this.super.init.call(this);
 			__(this).midi_note_number_to_bb = {};
 			__(this).buffer_dirty = false;
 			__(this).recalc_midi_note_number_to_bb.call(this);
@@ -384,7 +310,7 @@
 		};
 
 		prototype.bb_set = function (bb) {
-			prototype.super.bb_set.call(this, bb);
+			this.super.bb_set.call(this, bb);
 			__(this).buffer.width = _(this).bb.width;
 			__(this).buffer.height = _(this).bb.height;
 			__(this).recalc_midi_note_number_to_bb.call(this);

@@ -131,22 +131,22 @@
 	};
 
 	var callback_ui_canvas_mouse_move = _callback_ui_canvas_mouse_wrapper(function (event) {
-		spz.client.ui.root.touch_move(event);
+		spz.client.ui.root.event_occurred('touch_move', event);
 		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_mouse_down = _callback_ui_canvas_mouse_wrapper(function (event) {
-		spz.client.ui.root.touch_start(event);
+		spz.client.ui.root.event_occurred('touch_start', event);
 		callback_ui_redraw();
 	});
 	
 	var callback_ui_canvas_mouse_up = _callback_ui_canvas_mouse_wrapper(function (event) {
-		spz.client.ui.root.touch_end(event);
+		spz.client.ui.root.event_occurred('touch_end', event);
 		callback_ui_redraw();
 	});
 	
 	var callback_ui_canvas_mouse_leave = _callback_ui_canvas_mouse_wrapper(function (event) {
-		spz.client.ui.root.touch_leave(event);
+		spz.client.ui.root.event_occurred('touch_leave', event);
 		callback_ui_redraw();
 	});
 	
@@ -160,27 +160,28 @@
 	};
 
 	var callback_ui_canvas_touch_start = _callback_ui_canvas_touch_shim(function (event) {
-		spz.client.ui.root.touch_start(event);
+		spz.client.ui.root.event_occurred('touch_start', event);
 		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_move = _callback_ui_canvas_touch_shim(function (event) {
-		spz.client.ui.root.touch_move(event);
+		spz.client.ui.root.event_occurred('touch_move', event);
 		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_end = _callback_ui_canvas_touch_shim(function (event) {
-		spz.client.ui.root.touch_end(event);
+		spz.client.ui.root.event_occurred('touch_end', event);
 		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_cancel = _callback_ui_canvas_touch_shim(function (event) {
-		spz.client.ui.root.touch_cancel(event);
+		spz.client.ui.root.event_occurred('touch_cancel', event);
 		callback_ui_redraw();
 	});
 
 	var callback_ui_canvas_touch_leave = _callback_ui_canvas_touch_shim(function (event) {
-		spz.client.ui.root.touch_leave(event);
+		spz.client.ui.root.event_occurred('touch_leave', event);
+		callback_ui_redraw();
 	});
 
 	var callback_ui_redraw = function () {
