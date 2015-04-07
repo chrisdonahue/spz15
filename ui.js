@@ -13,7 +13,7 @@
 		};
 	});
 
-	spz.client.views.canvas = component.subclass(function(prototype, _, _protected, __, __private) {
+	spz.client.views.canvas_app = component.subclass(function(prototype, _, _protected, __, __private) {
 		prototype.init = function (canvas_id, root_type) {
 			// canvas
 			var canvas = __(this).canvas = document.getElementById(canvas_id);
@@ -25,13 +25,14 @@
 
 			// event handling
 			if (window.supports_touch_events) {
+				var that = this;
 				var event_touch_shim = function (callback) {
 					return function (event) {
 						if (!('changedTouches' in event)) {
 							event = event.originalEvent;
 						}
 						callback(event);
-						root.redraw();
+						that.redraw();
 					}
 				};
 
@@ -42,16 +43,17 @@
 				canvas.ontouchcancel = event_touch_shim(root.event_callback_get('touch_cancel'));
 			}
 			else {
+				var that = this;
 				var event_mouse_to_touch_shim = function (callback) {
 					return function(event) {
-						event.changesTouches = [];
+						event.changedTouches = [];
 						event.changedTouches.push({
 							clientX: event.clientX || -1,
 							clientY: event.clientY || -1,
 							identifier: spz.defines.touch_id_mouse
 						});
 						callback(event);
-						root.redraw();
+						that.redraw();
 					};
 				}
 
@@ -72,16 +74,17 @@
 			__(this).root_bb.width = width;
 			__(this).root_bb.height = height;
 			__(this).root.bb_set(__(this).root_bb);
+
+			// redraw
+
 		};
 
 		prototype.canvas_context_2d_get = function () {
 			return __(this).canvas_ctx;
 		};
 
-		prototype.event_enable = function (event_type) {
-			__(this).canvas['on' + event_type] = function () {
-				callback;
-			}
+		prototype.redraw = function () {
+			__(this).root.redraw(__(this).canvas_ctx);
 		};
 	});
 
@@ -116,7 +119,7 @@
 		};
 
 		prototype.event_callback_get = function (event_type) {
-			if (event_type in __(that).event_callbacks) {
+			if (event_type in __(this).event_callbacks) {
 				return __(this).event_callbacks[event_type];
 			}
 			else {
