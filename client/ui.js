@@ -114,8 +114,11 @@
 			return _(this).bb.contains(x, y);
 		};
 
-		prototype.event_on = function (event_type, callback) {
-			__(this).event_callbacks[event_type] = callback;
+		prototype.event_on = function (event_type, callback, bind) {
+			bind = bind || this;
+			__(this).event_callbacks[event_type] = function (event) {
+				callback.call(bind, event);
+			};
 		};
 
 		prototype.event_off = function (event_type) {
@@ -412,10 +415,6 @@
 
 			canvas_ctx.fillStyle = 'rgb(255, 255, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px monospace';
-			canvas_ctx.textBaseline='top';
-			canvas_ctx.fillText('envelope', bb.x, bb.y);
 		};
 	});
 
@@ -437,10 +436,6 @@
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px monospace';
-			canvas_ctx.textBaseline='top';
-			canvas_ctx.fillText('patch', bb.x, bb.y);
 		};
 	});
 
@@ -462,10 +457,6 @@
 
 			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px monospace';
-			canvas_ctx.textBaseline='top';
-			canvas_ctx.fillText('output', bb.x, bb.y);
 		};
 	});
 
@@ -487,10 +478,6 @@
 
 			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px monospace';
-			canvas_ctx.textBaseline='top';
-			canvas_ctx.fillText('sounds', bb.x, bb.y);
 		};
 	});
 
@@ -513,10 +500,19 @@
 
 		prototype.init = function () {
 			this.super.init.call(this);
-			_(this).subview_add.call(this, 'octave_down', new button_text('+'));
-			_(this).subview_add.call(this, 'octave_up', new button_text('+'));
-			_(this).subview_add.call(this, 'zoom_in', new button_text('-'));
-			_(this).subview_add.call(this, 'zoom_out', new button_text('+'));
+			var that = this;
+
+			// piano
+			var piano = new spz.client.views.piano();
+
+			// zoom out button
+			var zoom_out = new button_text('-');
+			_(this).subview_add.call(this, 'zoom_out', zoom_out);
+			zoom_out.event_on('touch_end', piano.zoom_out, piano);
+
+			//_(this).subview_add.call(this, 'octave_down', new button_text('+'));
+			//_(this).subview_add.call(this, 'octave_up', new button_text('+'));
+			//_(this).subview_add.call(this, 'zoom_in', new button_text('+'));
 			_(this).subview_add.call(this, 'piano', new spz.client.views.piano());
 		};
 
@@ -527,19 +523,10 @@
 			var bb_piano = settings.piano.to_abs(bb);
 
 			_(this).subview_get.call(this, 'piano').bb_set(bb_piano);
-			_(this).subview_get.call(this, 'octave_down').bb_set(bb_controls);
+			_(this).subview_get.call(this, 'zoom_out').bb_set(bb_controls);
 		};
 
 		_protected.redraw = function (canvas_ctx) {
-			console.log('redraw sounds');
-			var bb = _(this).bb;
-
-			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
-			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.font='30px monospace';
-			canvas_ctx.textBaseline='top';
-			canvas_ctx.fillText('keyboard', bb.x, bb.y);
 		};
 	});
 
@@ -571,6 +558,14 @@
 			this.event_on.call(this, 'touch_cancel', __(this).callback_touch_cancel);
 		};
 
+		prototype.zoom_out = function () {
+			if (spz.client.ui.keyboard.midi_octaves_displayed < 6) {
+				spz.client.ui.keyboard.midi_octaves_displayed += 1;
+				__(this).recalc_midi_note_number_to_bb.call(this);
+				_(this).dirty = true;
+			}
+		};
+
 		prototype.bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 			__(this).buffer.width = _(this).bb.width;
@@ -589,8 +584,8 @@
 			var canvas_height = bb.height;
 			var canvas_buffer = __(this).buffer;
 
-			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
-			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
+			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
+			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
 
 			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
 
@@ -756,8 +751,8 @@
 			var x = touch.clientX - bb.x;
 			var y = touch.clientY - bb.y;
 
-			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
-			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
+			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
+			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
 
 			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
 
@@ -790,8 +785,8 @@
 		};
 
 		__private.recalc_midi_note_number_to_bb = function () {
-			var midi_note_number_lower = spz.client.ui.keyboard.midi_note_number_lower;
-			var midi_note_number_upper = spz.client.ui.keyboard.midi_note_number_upper;
+			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
+			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
 			var bb = _(this).bb;
 
 			__(this).midi_note_number_to_bb = {};
