@@ -16,9 +16,6 @@
 	<div id="canvas">
 		<canvas id="client_ui"></canvas>
 	</div>
-	<div id="svg" style="display:none">
-		<img id="keyboard" src="img/view_icons/keyboard.svg"/>
-	</div>
 
 	<script type="text/javascript" src="js_lib/jquery-1.11.2.min.js"></script>
 	<script type="text/javascript" src="js_lib/osc-browser.min.js"></script>
@@ -61,8 +58,8 @@
 			for (var i = 0; i < spz.client.options.ui.views_enabled.length; i++) {
 				var view_id = spz.client.options.ui.views_enabled[i];
 				spz.client.resources.view_icons[view_id] = {};
-				//spz.client.resources.view_icons[view_id].url = 'http://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg';
-				spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
+				spz.client.resources.view_icons[view_id].url = 'http://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg';
+				//spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
 				spz.client.resources.view_icons[view_id].data = null;
 				spz.client.resources.view_icons[view_id].image = null;
 			}

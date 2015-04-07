@@ -62,18 +62,17 @@
 		var app = spz.client.app = new spz.client.views.canvas_app('client_ui', spz.client.views.root);
 
 		// load SVG resources
+		var DOMURL = window.URL || window.webkitURL || window;
 		for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
 			var view_id = spz.client.ui.views_enabled[i];
 			// hack for some weird Chrome closure bug...
 			var callback_done_generator = function (_view_id) {
 				return function (data) {
 					spz.client.resources.view_icons[_view_id].data = data;
-					var DOMURL = window.URL || window.webkitURL || window;
 					var image = new Image();
 					var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
 					var url = DOMURL.createObjectURL(svg);
 					image.onload = function () {
-						console.log('redrawing due to icon');
 						spz.client.app.redraw(true);
 					};
 					spz.client.resources.view_icons[_view_id].image = image;
