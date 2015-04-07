@@ -1,0 +1,2 @@
+oh god:
+	http://joshgertzen.com/object-oriented-super-class-method-calling-with-javascript/
