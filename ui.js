@@ -88,14 +88,6 @@
 		};
 
 		prototype.redraw = function (canvas_ctx) {
-			// redraw subviews
-			for (subview_id in _(this).subviews) {
-				var subview = _(this).subviews[subview_id];
-				if (subview.redraw_necessary()) {
-					subview.redraw(canvas_ctx);
-				}
-			}
-
 			// redraw this
 			if (_(this).dirty) {
 				// redraw
@@ -103,6 +95,14 @@
 
 				// mark as clean
 				_(this).dirty = false;
+			}
+
+			// redraw subviews
+			for (subview_id in __(this).subviews) {
+				var subview = __(this).subviews[subview_id];
+				if (subview.redraw_necessary()) {
+					subview.redraw(canvas_ctx);
+				}
 			}
 		};
 
@@ -163,22 +163,39 @@
 		prototype.init = function () {
 			this.super.init.call(this);
 
-			for (var subview_id in spz.defines.views_enabled) {
-				var subview_name = spz.defines.views_enabled[subview_id];
-				_(this).subview_add.call(this, subview_id, new spz.client.views[subview_name]());
+			// create subviews
+			__(this).sections_cache = {};
+			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
+				var view_id = spz.client.ui.views_enabled[i];
+				_(this).subview_add.call(this, 'nav_button_' + view_id, new spz.client.views.nav_button(view_id));
+				__(this).sections_cache[view_id] = new spz.client.views[view_id]();
 			}
+
+			// add current section subview
+			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
 		};
 
 		prototype.bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 
 			var settings = __(this).settings[spz.client.ui.orientation];
-			__(this).nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
+			var nav_bb = __(this).nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
 			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
 
-			for (var subview_id in spz.defines.views_enabled) {
-				var subview_name = spz.defines.views_enabled[subview_id];
-				var subview = _(this).subview_get.call(this, subview_name);
+			var nav_button_height = Math.floor(nav_bb.height / spz.client.ui.views_enabled.length);
+			var nav_button_height_remainder = nav_bb.height % spz.client.ui.views_enabled.length;
+			var nav_button_height_used = nav_bb.y;
+			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
+				var view_id = spz.client.ui.views_enabled[i];
+				if (i == spz.client.ui.views_enabled.length - 1) {
+					nav_button_height += nav_button_height_remainder;
+				}
+				_(this).subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
+				nav_button_height_used += nav_button_height;
+			}
+
+			for (var subview_id in __(this).sections_cache) {
+				var subview = __(this).sections_cache[subview_id];
 				subview.bb_set(__(this).section_bb);
 			}
 		};
@@ -198,10 +215,36 @@
 			}
 
 			/*
-			if (spz.client.resources.view_icons[spz.defines.views_enabled.keyboard].data !== null) {
-				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.defines.views_enabled.keyboard].data, 0, 0, 100, 100);
+			if (spz.client.resources.view_icons[spz.client.ui.views_enabled.keyboard].data !== null) {
+				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.client.ui.views_enabled.keyboard].data, 0, 0, 100, 100);
 			}
 			*/
+		};
+
+		__private.section_change = function (section_new) {
+			_(this).subview_remove.call(this, 'section_' + spz.client.view_current);
+			spz.client.ui.view_current = section_new;
+			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
+		};
+	});
+
+	spz.client.views.nav_button = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+		__private.settings = {
+		};
+
+		prototype.init = function (view_id) {
+			this.super.init.call(this);
+		};
+
+		prototype.bb_set = function (bb) {
+			this.super.bb_set.call(this, bb);
+		};
+
+		_protected.redraw = function (canvas_ctx) {
+			var bb = _(this).bb;
+
+			canvas_ctx.fillStyle = spz.helpers.ui.color_random();
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, 5).fill();
 		};
 	});
 
@@ -218,9 +261,10 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
+			console.log('envelope');
 			var bb = _(this).bb;
 
-			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
+			canvas_ctx.fillStyle = 'rgb(255, 255, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
@@ -238,9 +282,10 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
+			console.log('patch');
 			var bb = _(this).bb;
 
-			canvas_ctx.fillStyle = 'rgb(0, 255, 0)';
+			canvas_ctx.fillStyle = 'rgb(255, 0, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
@@ -258,9 +303,10 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
+			console.log('output');
 			var bb = _(this).bb;
 
-			canvas_ctx.fillStyle = 'rgb(0, 0, 255)';
+			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
@@ -278,9 +324,10 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
+			console.log('keyboard');
 			var bb = _(this).bb;
 
-			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
+			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});

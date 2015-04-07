@@ -71,5 +71,12 @@
 	spz.helpers.ui.orientation_get = function (width, height) {
 		return width > height ? spz.defines.orientation.landscape : spz.defines.orientation.portrait;
 	};
-	
+
+	spz.helpers.ui.color_random = function () {
+		var r = 255*Math.random()|0,
+			g = 255*Math.random()|0,
+			b = 255*Math.random()|0;
+		return 'rgb(' + r + ',' + g + ',' + b + ')';
+	};
+
 })(window.spz);
