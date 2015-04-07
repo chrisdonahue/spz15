@@ -342,9 +342,9 @@
 			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
 
 			// draw svg
-			if (spz.client.resources.view_icons[__(this).view_id].data !== null) {
+			if (spz.client.resources.view_icons[__(this).view_id].image !== null) {
 				var dimension_short = Math.min(bb.width, bb.height);
-				var svg_size = dimension_short / 2;
+				var svg_size = dimension_short * 0.75;
 				var svg_x = bb.x + (bb.width - svg_size) / 2;
 				var svg_y = bb.y + (bb.height - svg_size) / 2;
 				canvas_ctx.drawImage(spz.client.resources.view_icons[__(this).view_id].image, svg_x, svg_y, svg_size, svg_size);
