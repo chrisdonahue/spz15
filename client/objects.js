@@ -62,16 +62,16 @@
 			truncate = truncate || true;
 			if (truncate) {
 				return new spz.client.objects.bb_abs(
-					Math.floor(this.x * bb_abs.width),
-					Math.floor(this.y * bb_abs.height),
+					Math.floor((this.x * bb_abs.width) + bb_abs.x),
+					Math.floor((this.y * bb_abs.height) + bb_abs.y),
 					Math.floor(this.width * bb_abs.width),
 					Math.floor(this.height * bb_abs.height)
 				);
 			}
 			else {
 				return new spz.client.objects.bb_abs(
-					Math.ceil(this.x * bb_abs.width),
-					Math.ceil(this.y * bb_abs.height),
+					Math.ceil((this.x * bb_abs.width) + bb_abs.x),
+					Math.ceil((this.y * bb_abs.height) + bb_abs.y),
 					Math.ceil(this.width * bb_abs.width),
 					Math.ceil(this.height * bb_abs.height)
 				);

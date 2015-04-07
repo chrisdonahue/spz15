@@ -14,31 +14,25 @@
 	}
 
 	/*
-		namespacing
+		set up namespaces and parse options
 	*/
-	
+
+	// namespaces
 	spz.client = spz.client || {};
 	spz.client.control = spz.client.control || {};
 	spz.client.ui = spz.client.ui || {};
 	
-	/*
-		control state
-	*/
-	
+	// control
 	$.extend(spz.client.control, spz.client.options.control);
-	
 	$.extend(spz.client.control, {
 			midi_note_number_to_touch_id: {},
 			touch_id_to_midi_note_number: {},
 			midi_note_velocity: 100
 	});
 	
-	/*
-		ui state
-	*/
-	
-	$.extend(spz.client.ui, spz.client.options.ui);
 
+	// ui
+	$.extend(spz.client.ui, spz.client.options.ui);
 	spz.client.ui.orientation = spz.defines.orientation.landscape;
 
 	/*
