@@ -256,7 +256,7 @@
 			var nav_bb = __(this).nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
 			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
 
-			if (spz.client.ui.orientation == spz.defines.orientation.landscape) {
+			if (spz.client.ui.orientation === spz.defines.orientation.landscape) {
 				var nav_button_height = Math.floor(nav_bb.height / spz.client.ui.views_enabled.length);
 				var nav_button_height_remainder = nav_bb.height % spz.client.ui.views_enabled.length;
 				var nav_button_height_used = nav_bb.y;
@@ -305,7 +305,7 @@
 			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
 			canvas_ctx.fillRect(nav_bb.x, nav_bb.y, nav_bb.width, nav_bb.height);
 			canvas_ctx.fillStyle = 'rgb(0, 0, 255)';
-			if (spz.client.ui.orientation == spz.defines.orientation.landscape) {
+			if (spz.client.ui.orientation === spz.defines.orientation.landscape) {
 				canvas_ctx.fillRect(nav_bb.width, 0, bb.width - nav_bb.width, bb.height);
 			}
 			else {

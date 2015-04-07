@@ -49,8 +49,8 @@
 	var callback_ui_window_resize = function () {
 		var browser_viewport_width = $(window).width();
 		var browser_viewport_height = $(window).height();
-		spz.client.app.resize(browser_viewport_width, browser_viewport_height);
 		spz.client.ui.orientation = spz.helpers.ui.orientation_get(browser_viewport_width, browser_viewport_height);
+		spz.client.app.resize(browser_viewport_width, browser_viewport_height);
 	};
 
 	/*
