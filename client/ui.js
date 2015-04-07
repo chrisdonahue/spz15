@@ -85,9 +85,10 @@
 			return __(this).canvas_ctx;
 		};
 
-		prototype.redraw = function () {
+		prototype.redraw = function (force) {
 			console.log('--------');
-			__(this).root.redraw(__(this).canvas_ctx);
+			force = force || false;
+			__(this).root.redraw(__(this).canvas_ctx, force);
 		};
 	});
 
@@ -151,9 +152,7 @@
 
 				for (subview_id in __(this).subviews) {
 					var subview = __(this).subviews[subview_id];
-					if (subview.redraw_necessary()) {
-						subview.redraw(canvas_ctx, true);
-					}
+					subview.redraw(canvas_ctx, true);
 				}
 			}
 			else {
@@ -311,12 +310,6 @@
 			else {
 				canvas_ctx.fillRect(0, nav_bb.height, bb.width, bb.height - nav_bb.height);
 			}
-
-			/*
-			if (spz.client.resources.view_icons[spz.client.ui.views_enabled.keyboard].data !== null) {
-				canvas_ctx.drawSvg(spz.client.resources.view_icons[spz.client.ui.views_enabled.keyboard].data, 0, 0, 100, 100);
-			}
-			*/
 		};
 	});
 
@@ -347,6 +340,15 @@
 
 			canvas_ctx.fillStyle = __(this).settings.color;
 			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
+
+			// draw svg
+			if (spz.client.resources.view_icons[__(this).view_id].data !== null) {
+				var dimension_short = Math.min(bb.width, bb.height);
+				var svg_size = dimension_short / 2;
+				var svg_x = bb.x + (bb.width - svg_size) / 2;
+				var svg_y = bb.y + (bb.height - svg_size) / 2;
+				canvas_ctx.drawImage(spz.client.resources.view_icons[__(this).view_id].image, svg_x, svg_y, svg_size, svg_size);
+			}
 		};
 
 		__private.touch_end_callback = function () {
