@@ -1,4 +1,4 @@
-(function (spz, ctor) {
+(function (spz) {
 	spz.client.objects = spz.client.objects || {};
 	spz.client.views = spz.client.views || {};
 
