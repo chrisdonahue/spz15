@@ -47,7 +47,7 @@
 						event.changesTouches = [];
 						event.changedTouches.push({
 							clientX: event.clientX || -1,
-							clientY: event.clientY || -1
+							clientY: event.clientY || -1,
 							identifier: spz.defines.touch_id_mouse
 						});
 						callback(event);
