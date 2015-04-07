@@ -29,6 +29,7 @@
 #X msg 606 275 send /pan \$1;
 #X obj 609 243 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
 -1 -1 0 1;
+#X msg 70 148 connect localhost 1235;
 #X connect 2 0 1 0;
 #X connect 3 0 1 0;
 #X connect 4 0 5 0;
@@ -55,3 +56,4 @@
 #X connect 25 0 23 0;
 #X connect 26 0 2 0;
 #X connect 27 0 26 0;
+#X connect 28 0 1 0;

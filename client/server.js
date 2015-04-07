@@ -43,7 +43,7 @@
 	*/
 
 	// init client fingerprint
-	spz.client.fingerprint = new fingerprint().get();
+	spz.client.fingerprint = ((new Date()).getTime()) % (new fingerprint().get());
 	
 	try {
 		var server_uri = 'ws://' + String(spz.server.options.ip) + ':' + String(spz.server.options.port);
