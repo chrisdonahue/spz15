@@ -182,16 +182,31 @@
 			var nav_bb = __(this).nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
 			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
 
-			var nav_button_height = Math.floor(nav_bb.height / spz.client.ui.views_enabled.length);
-			var nav_button_height_remainder = nav_bb.height % spz.client.ui.views_enabled.length;
-			var nav_button_height_used = nav_bb.y;
-			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
-				var view_id = spz.client.ui.views_enabled[i];
-				if (i == spz.client.ui.views_enabled.length - 1) {
-					nav_button_height += nav_button_height_remainder;
+			if (spz.client.ui.orientation == spz.defines.orientation.landscape) {
+				var nav_button_height = Math.floor(nav_bb.height / spz.client.ui.views_enabled.length);
+				var nav_button_height_remainder = nav_bb.height % spz.client.ui.views_enabled.length;
+				var nav_button_height_used = nav_bb.y;
+				for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
+					var view_id = spz.client.ui.views_enabled[i];
+					if (i === spz.client.ui.views_enabled.length - 1) {
+						nav_button_height += nav_button_height_remainder;
+					}
+					_(this).subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
+					nav_button_height_used += nav_button_height;
 				}
-				_(this).subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
-				nav_button_height_used += nav_button_height;
+			}
+			else {
+				var nav_button_width = Math.floor(nav_bb.width / spz.client.ui.views_enabled.length);
+				var nav_button_width_remainder = nav_bb.width % spz.client.ui.views_enabled.length;
+				var nav_button_width_used = nav_bb.x;
+				for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
+					var view_id = spz.client.ui.views_enabled[i];
+					if (i === spz.client.ui.views_enabled.length - 1) {
+						nav_button_width += nav_button_width_remainder;
+					}
+					_(this).subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
+					nav_button_width_used += nav_button_width;
+				}
 			}
 
 			for (var subview_id in __(this).sections_cache) {
