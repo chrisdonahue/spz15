@@ -68,7 +68,7 @@
 			// hack for some weird Chrome closure bug...
 			var callback_done_generator = function (_view_id) {
 				return function (data) {
-					spz.client.resources.view_icons[_view_id].data = data;
+					//spz.client.resources.view_icons[_view_id].data = data;
 					var image = new Image();
 					var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
 					var url = DOMURL.createObjectURL(svg);
