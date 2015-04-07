@@ -13,7 +13,7 @@
 		};
 	});
 
-	spz.client.views.canvas_app = component.subclass(function(prototype, _, _protected, __, __private) {
+	spz.client.views.canvas_app = ctor(function(prototype, _, _protected, __, __private) {
 		prototype.init = function (canvas_id, root_type) {
 			// canvas
 			var canvas = __(this).canvas = document.getElementById(canvas_id);
@@ -28,6 +28,7 @@
 				var that = this;
 				var event_touch_shim = function (callback) {
 					return function (event) {
+						event.consumed = false;
 						if (!('changedTouches' in event)) {
 							event = event.originalEvent;
 						}
@@ -46,6 +47,7 @@
 				var that = this;
 				var event_mouse_to_touch_shim = function (callback) {
 					return function(event) {
+						event.consumed = false;
 						event.changedTouches = [];
 						event.changedTouches.push({
 							clientX: event.clientX || -1,
@@ -76,7 +78,7 @@
 			__(this).root.bb_set(__(this).root_bb);
 
 			// redraw
-
+			this.redraw.call(this);
 		};
 
 		prototype.canvas_context_2d_get = function () {
@@ -84,6 +86,7 @@
 		};
 
 		prototype.redraw = function () {
+			console.log('--------');
 			__(this).root.redraw(__(this).canvas_ctx);
 		};
 	});
@@ -91,7 +94,7 @@
 	spz.client.views.base = component.subclass(function(prototype, _, _protected, __, __private) {
 		prototype.init = function () {
 			_(this).bb = new spz.client.objects.bb_abs();
-			_(this).dirty = true;
+			_(this).dirty = false;
 			__(this).subviews = {};
 			__(this).subviews_count = 0;
 			__(this).event_callbacks = __(this).event_callbacks || {};
@@ -119,58 +122,60 @@
 		};
 
 		prototype.event_callback_get = function (event_type) {
-			if (event_type in __(this).event_callbacks) {
-				return __(this).event_callbacks[event_type];
-			}
-			else {
-				return null;
-			}
-		};
-
-		prototype.event_occurred = function (event_type, event) {
-			// call callback on subviews if intersects
-			for (var subview_id in __(this).subviews) {
-				var subview = __(this).subviews[subview_id];
-				var touch_event = event.changedTouches[0];
-				if (subview.contains(touch_event.clientX, touch_event.clientY)) {
-					subview.event_occurred(event_type, event);
+			var that = this;
+			var subviews = __(this).subviews;
+			var callbacks = __(this).event_callbacks;
+			return function (event) {
+				for (var subview_id in subviews) {
+					var subview = subviews[subview_id];
+					var touch_event = event.changedTouches[0];
+					if (subview.contains(touch_event.clientX, touch_event.clientY)) {
+						subview.event_callback_get(event_type)(event);
+					}
+				}
+				if (!event.consumed && event_type in callbacks) {
+					callbacks[event_type].call(that, event);
 				}
 			}
-
-			// call this view's callback if required
-			var event_callbacks = __(this).event_callbacks;
-			if (event_type in event_callbacks && !event.isPropagationStopped()) {
-				event_callbacks[event_type].call(this, (event));
-			}
 		};
 
-		prototype.redraw_necessary = function () {
-			if (_(this).dirty) {
-				return true;
-			}
-			for (subview_id in _(this).subviews) {
-				if (_(this).subviews[subview_id].redraw_necessary()) {
-					return true;
-				}
-			}
-			return false;
-		};
+		prototype.redraw = function (canvas_ctx, force) {
+			force = force || false;
 
-		prototype.redraw = function (canvas_ctx) {
-			// redraw this
-			if (_(this).dirty) {
+			if (force) {
 				// redraw
 				_(this).redraw.call(this, canvas_ctx);
 
 				// mark as clean
 				_(this).dirty = false;
-			}
 
-			// redraw subviews
-			for (subview_id in __(this).subviews) {
-				var subview = __(this).subviews[subview_id];
-				if (subview.redraw_necessary()) {
-					subview.redraw(canvas_ctx);
+				for (subview_id in __(this).subviews) {
+					var subview = __(this).subviews[subview_id];
+					if (subview.redraw_necessary()) {
+						subview.redraw(canvas_ctx, true);
+					}
+				}
+			}
+			else {
+				if (_(this).dirty) {
+					// redraw
+					_(this).redraw.call(this, canvas_ctx);
+
+					// mark as clean
+					_(this).dirty = false;
+
+					// force all children to redraw
+					for (subview_id in __(this).subviews) {
+						var subview = __(this).subviews[subview_id];
+						subview.redraw(canvas_ctx, true);
+					}
+				}
+				else {
+					// redraw all children
+					for (subview_id in __(this).subviews) {
+						var subview = __(this).subviews[subview_id];
+						subview.redraw(canvas_ctx, false);
+					}
 				}
 			}
 		};
@@ -285,13 +290,15 @@
 		};
 
 		prototype.section_change = function (section_new) {
-			_(this).subview_remove.call(this, 'section_' + spz.client.view_current);
+			_(this).subview_remove.call(this, 'section_' + spz.client.ui.view_current);
 			spz.client.ui.view_current = section_new;
 			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
 			_(this).dirty = true;
 		};
 
 		_protected.redraw = function (canvas_ctx) {
+			console.log('redraw root');
+
 			var bb = _(this).bb;
 			var nav_bb = __(this).nav_bb;
 
@@ -314,20 +321,20 @@
 	});
 
 	spz.client.views.nav_button = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
-			rounded_corner: 20
-		};
+		// here i discovered that assigning attributes on __private
+		// are passed by reference to all children's private prototypes instead of copied :/
 
 		prototype.init = function (parent, view_id) {
 			this.super.init.call(this);
 
 			__(this).parent = parent;
 			__(this).view_id = view_id;
-			this.event_on.call(this, 'touch_end', __(this).touch_end_callback);
-		};
 
-		__private.touch_end_callback = function () {
-			__(this).parent.section_change(__(this).view_id);
+			__(this).settings = {};
+			__(this).settings.rounded_corner = 20;
+			__(this).settings.color = spz.helpers.ui.color_random();
+
+			this.event_on.call(this, 'touch_end', __(this).touch_end_callback);
 		};
 
 		prototype.bb_set = function (bb) {
@@ -335,10 +342,15 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
+			console.log('redraw nav_button_' + __(this).view_id);
 			var bb = _(this).bb;
 
-			canvas_ctx.fillStyle = spz.helpers.ui.color_random();
+			canvas_ctx.fillStyle = __(this).settings.color;
 			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
+		};
+
+		__private.touch_end_callback = function () {
+			__(this).parent.section_change(__(this).view_id);
 		};
 	});
 
@@ -355,17 +367,20 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
-			console.log('envelope');
+			console.log('redraw envelope');
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 255, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.font='30px Georgia';
+			canvas_ctx.textBaseline='top';
+			canvas_ctx.fillText('envelope', bb.x, bb.y);
 		};
 	});
 
 	spz.client.views[spz.defines.views_available.patch] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
 		__private.settings = {
-
 		};
 
 		prototype.init = function () {
@@ -377,11 +392,15 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
-			console.log('patch');
+			console.log('redraw patch');
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.font='30px Georgia';
+			canvas_ctx.textBaseline='top';
+			canvas_ctx.fillText('patch', bb.x, bb.y);
 		};
 	});
 
@@ -398,11 +417,15 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
-			console.log('output');
+			console.log('redraw output');
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.font='30px Georgia';
+			canvas_ctx.textBaseline='top';
+			canvas_ctx.fillText('output', bb.x, bb.y);
 		};
 	});
 
@@ -419,11 +442,15 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
-			console.log('keyboard');
+			console.log('redraw keyboard');
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.font='30px Georgia';
+			canvas_ctx.textBaseline='top';
+			canvas_ctx.fillText('keyboard', bb.x, bb.y);
 		};
 	});
 
@@ -440,11 +467,15 @@
 		};
 
 		_protected.redraw = function (canvas_ctx) {
-			console.log('sounds');
+			console.log('redraw sounds');
 			var bb = _(this).bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.font='30px Georgia';
+			canvas_ctx.textBaseline='top';
+			canvas_ctx.fillText('sounds', bb.x, bb.y);
 		};
 	});
 
