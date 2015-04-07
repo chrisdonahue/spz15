@@ -68,11 +68,22 @@
 			var callback_done_generator = function (_view_id) {
 				return function (data) {
 					spz.client.resources.view_icons[_view_id].data = data;
-					spz.client.app.redraw();
+					var DOMURL = window.URL || window.webkitURL || window;
+					var image = new Image();
+					var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+					var url = DOMURL.createObjectURL(svg);
+					image.onload = function () {
+						console.log('redrawing due to icon');
+						spz.client.app.redraw(true);
+					};
+					spz.client.resources.view_icons[_view_id].image = image;
+					image.src = url;
 				};
 			}
 			$.ajax({
-				url: spz.client.resources.view_icons[view_id].url
+				url: spz.client.resources.view_icons[view_id].url,
+				type: 'GET',
+				dataType: 'text'
 			}).done(callback_done_generator(view_id));
 		}
 
