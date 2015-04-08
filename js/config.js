@@ -35,7 +35,7 @@ window.spz = window.spz || {};
 	};
 
 	// client ui options
-	spz.client.options.ui.view_icons_use = false;
+	spz.client.options.ui.view_icons_use = true;
 	spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
 	spz.client.options.ui.view_current = views_available.keyboard;
 	spz.client.options.ui[views_available.keyboard] = {};
@@ -47,9 +47,12 @@ window.spz = window.spz || {};
 		spz.client.resources.view_icons = {};
 		for (var i = 0; i < spz.client.options.ui.views_enabled.length; i++) {
 			var view_id = spz.client.options.ui.views_enabled[i];
+			var file_name = view_id;
+			if (view_id === views_available.sounds) {
+				file_name = 'pig';
+			}
 			spz.client.resources.view_icons[view_id] = {};
-			//spz.client.resources.view_icons[view_id].url = 'http://upload.wikimedia.org/wikipedia/en/8/80/Wikipedia-logo-v2.svg';
-			spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + view_id + '.svg';
+			spz.client.resources.view_icons[view_id].url = 'img/view_icons/' + file_name + '.svg';
 			spz.client.resources.view_icons[view_id].data = null;
 			spz.client.resources.view_icons[view_id].image = null;
 		}
