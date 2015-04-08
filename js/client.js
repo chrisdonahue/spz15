@@ -51,7 +51,7 @@
 		var app = spz.client.app = new capp.canvas('spz_app_canvas');
 
 		// create root component
-		app.component_root_set(new spz.client.views.root());
+		app.component_root_set(new spz.client.components.root());
 
 		// load SVG resources
 		var DOMURL = window.URL || window.webkitURL || window;
