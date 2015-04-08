@@ -39,6 +39,7 @@
 		var browser_viewport_height = $(window).height();
 		spz.client.ui.orientation = spz.helpers.ui.orientation_get(browser_viewport_width, browser_viewport_height);
 		spz.client.app.resize(browser_viewport_width, browser_viewport_height);
+		spz.client.app.redraw();
 	};
 
 	/*
@@ -48,6 +49,10 @@
 	var callback_document_ready = function () {
 		// create canvas app
 		var app = spz.client.app = new capp.canvas('client_ui');
+
+		// create root component
+		var test_button = new capp.button_text('the ultimate test');
+		app.component_root_set(test_button);
 
 		// load SVG resources
 		var DOMURL = window.URL || window.webkitURL || window;

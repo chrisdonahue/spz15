@@ -1,97 +1,60 @@
 (function (spz, capp) {
 	spz.client.views = spz.client.views || {};
 
-	var button_text = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {};
-		__private.settings.rounded_corner = 20;
-
-		prototype.init = function (text) {
-			this.super.init.call(this);
-			__(this).text = text;
-		};
-
-		_protected.redraw = function (canvas_ctx) {
-			var bb = _(this).bb;
-			var text = __(this).text;
-
-			// draw button
-			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
-			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
-
-			// text options
-			canvas_ctx.fillStyle = 'rgb(255, 255, 255)';
-			canvas_ctx.textBaseline = 'middle';
-			canvas_ctx.textAlign = 'center';
-
-			// fit text
-			var text_height = bb.height * 0.8;
-			canvas_ctx.font = text_height.toString() + 'pt monospace';
-			var text_width = canvas_ctx.measureText(text).width;
-			var max_width = bb.width * 0.8;
-			while (text_width > max_width) {
-				text_height *= 0.8;
-				canvas_ctx.font = text_height.toString() + 'pt monospace';
-				text_width = canvas_ctx.measureText(text).width;
-			}
-
-			// draw text
-			canvas_ctx.fillText(__(this).text, bb.x + (bb.width / 2), bb.y + (bb.height / 2));
-		};
-	});
-
-	spz.client.views.root = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {};
-		__private.settings[spz.defines.orientation.landscape] = {};
-		__private.settings[spz.defines.orientation.portrait] = {};
-		__private.settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
+	spz.client.views.root = function ()
+		__settings: {
+		},
+		__settings[spz.defines.orientation.landscape] = {},
+		__settings[spz.defines.orientation.portrait] = {};
+		__settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
 			0.0,
 			0.0,
 			0.2,
 			1.0
 		);
-		__private.settings[spz.defines.orientation.landscape].section = new spz.client.objects.bb_rel(
+		__settings[spz.defines.orientation.landscape].section = new spz.client.objects.bb_rel(
 			0.2,
 			0.0,
 			0.8,
 			1.0
 		);
-		__private.settings[spz.defines.orientation.landscape].section_border = 0.02;
+		__settings[spz.defines.orientation.landscape].section_border = 0.02;
 
-		__private.settings[spz.defines.orientation.portrait].nav = new spz.client.objects.bb_rel(
+		__settings[spz.defines.orientation.portrait].nav = new spz.client.objects.bb_rel(
 			0.0,
 			0.0,
 			1.0,
 			0.2
 		);
-		__private.settings[spz.defines.orientation.portrait].section = new spz.client.objects.bb_rel(
+		__settings[spz.defines.orientation.portrait].section = new spz.client.objects.bb_rel(
 			0.0,
 			0.2,
 			1.0,
 			0.8
 		);
-		__private.settings[spz.defines.orientation.portrait].section_border = 0.02;
+		__settings[spz.defines.orientation.portrait].section_border = 0.02;
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
 
 			// create subviews
-			__(this).sections_cache = {};
+			this.__sections_cache = {};
 			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
 				var view_id = spz.client.ui.views_enabled[i];
-				_(this).subview_add.call(this, 'nav_button_' + view_id, new spz.client.views.nav_button(this, view_id));
-				__(this).sections_cache[view_id] = new spz.client.views[view_id]();
+				this._subview_add.call(this, 'nav_button_' + view_id, new spz.client.views.nav_button(this, view_id));
+				this.__sections_cache[view_id] = new spz.client.views[view_id]();
 			}
 
 			// add current section subview
-			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
+			this._subview_add.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 
-			var settings = __(this).settings[spz.client.ui.orientation];
-			var nav_bb = __(this).nav_bb = __(this).settings[spz.client.ui.orientation].nav.to_abs(bb);
-			__(this).section_bb = settings.section.to_abs(_(this).bb, false).with_border(settings.section_border);
+			var settings = this.__settings[spz.client.ui.orientation];
+			var nav_bb = this.__nav_bb = this.__settings[spz.client.ui.orientation].nav.to_abs(bb);
+			this.__section_bb = settings.section.to_abs(this._bb, false).with_border(settings.section_border);
 
 			if (spz.client.ui.orientation === spz.defines.orientation.landscape) {
 				var nav_button_height = Math.floor(nav_bb.height / spz.client.ui.views_enabled.length);
@@ -102,7 +65,7 @@
 					if (i === spz.client.ui.views_enabled.length - 1) {
 						nav_button_height += nav_button_height_remainder;
 					}
-					_(this).subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
+					this._subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
 					nav_button_height_used += nav_button_height;
 				}
 			}
@@ -115,29 +78,29 @@
 					if (i === spz.client.ui.views_enabled.length - 1) {
 						nav_button_width += nav_button_width_remainder;
 					}
-					_(this).subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
+					this._subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
 					nav_button_width_used += nav_button_width;
 				}
 			}
 
-			for (var subview_id in __(this).sections_cache) {
-				var subview = __(this).sections_cache[subview_id];
-				subview.bb_set(__(this).section_bb);
+			for (var subview_id in this.__sections_cache) {
+				var subview = this.__sections_cache[subview_id];
+				subview.bb_set(this.__section_bb);
 			}
 		};
 
-		prototype.section_change = function (section_new) {
-			_(this).subview_remove.call(this, 'section_' + spz.client.ui.view_current);
+		section_change = function (section_new) {
+			this._subview_remove.call(this, 'section_' + spz.client.ui.view_current);
 			spz.client.ui.view_current = section_new;
-			_(this).subview_add.call(this, 'section_' + spz.client.ui.view_current, __(this).sections_cache[spz.client.ui.view_current]);
-			_(this).dirty = true;
+			this._subview_add.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
+			this._dirty = true;
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 			console.log('redraw root');
 
-			var bb = _(this).bb;
-			var nav_bb = __(this).nav_bb;
+			var bb = this._bb;
+			var nav_bb = this.__nav_bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 0)';
 			canvas_ctx.fillRect(nav_bb.x, nav_bb.y, nav_bb.width, nav_bb.height);
@@ -151,151 +114,151 @@
 		};
 	});
 
-	spz.client.views.nav_button = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
+	spz.client.views.nav_button = function ()
 		// here i discovered that assigning attributes on __private
 		// are passed by reference to all children's private prototypes instead of copied :/
 
-		prototype.init = function (parent, view_id) {
+		constructor: function (parent, view_id) {
 			this.super.init.call(this);
 
-			__(this).parent = parent;
-			__(this).view_id = view_id;
+			this.__parent = parent;
+			this.__view_id = view_id;
 
-			__(this).settings = {};
-			__(this).settings.rounded_corner = 20;
-			__(this).settings.color = spz.helpers.ui.color_random();
+			this.__settings = {};
+			this.__settings.rounded_corner = 20;
+			this.__settings.color = spz.helpers.ui.color_random();
 
-			this.event_on.call(this, 'touch_end', __(this).callback_touch_end);
+			this.event_on.call(this, 'touch_end', this.__callback_touch_end);
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
-			console.log('redraw nav_button_' + __(this).view_id);
-			var bb = _(this).bb;
+		_redraw = function (canvas_ctx) {
+			console.log('redraw nav_button_' + this.__view_id);
+			var bb = this._bb;
 
-			canvas_ctx.fillStyle = __(this).settings.color;
-			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, __(this).settings.rounded_corner).fill();
+			canvas_ctx.fillStyle = this.__settings.color;
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, this.__settings.rounded_corner).fill();
 
 			// draw svg
-			if (spz.client.resources.view_icons[__(this).view_id].image !== null) {
+			if (spz.client.resources.view_icons[this.__view_id].image !== null) {
 				var dimension_short = Math.min(bb.width, bb.height);
 				var svg_size = dimension_short * 0.75;
 				var svg_x = bb.x + (bb.width - svg_size) / 2;
 				var svg_y = bb.y + (bb.height - svg_size) / 2;
-				canvas_ctx.drawImage(spz.client.resources.view_icons[__(this).view_id].image, svg_x, svg_y, svg_size, svg_size);
+				canvas_ctx.drawImage(spz.client.resources.view_icons[this.__view_id].image, svg_x, svg_y, svg_size, svg_size);
 			}
 		};
 
-		__private.callback_touch_end = function () {
-			__(this).parent.section_change(__(this).view_id);
+		__callback_touch_end = function () {
+			this.__parent.section_change(this.__view_id);
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.envelope] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
+	spz.client.views[spz.defines.views_available.envelope] = function ()
+		__settings = {
 		};
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 			console.log('redraw envelope');
-			var bb = _(this).bb;
+			var bb = this._bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 255, 0)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.patch] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
+	spz.client.views[spz.defines.views_available.patch] = function ()
+		__settings = {
 		};
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 			console.log('redraw patch');
-			var bb = _(this).bb;
+			var bb = this._bb;
 
 			canvas_ctx.fillStyle = 'rgb(255, 0, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.output] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
+	spz.client.views[spz.defines.views_available.output] = function ()
+		__settings = {
 		};
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 			console.log('redraw output');
-			var bb = _(this).bb;
+			var bb = this._bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.sounds] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
+	spz.client.views[spz.defines.views_available.sounds] = function ()
+		__settings = {
 		};
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 			console.log('redraw sounds');
-			var bb = _(this).bb;
+			var bb = this._bb;
 
 			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.keyboard] = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {};
+	spz.client.views[spz.defines.views_available.keyboard] = function ()
+		__settings = {};
 
-		__private.settings.controls = {};
-		__private.settings.controls.bb = new spz.client.objects.bb_rel(
+		__settings.controls = {};
+		__settings.controls.bb = new spz.client.objects.bb_rel(
 			0.0,
 			0.0,
 			1.0,
 			0.2
 		);
-		__private.settings.piano = new spz.client.objects.bb_rel(
+		__settings.piano = new spz.client.objects.bb_rel(
 			0.0,
 			0.2,
 			1.0,
 			0.8
 		);
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
 			var that = this;
 
@@ -304,31 +267,31 @@
 
 			// zoom out button
 			var zoom_out = new button_text('-');
-			_(this).subview_add.call(this, 'zoom_out', zoom_out);
+			this._subview_add.call(this, 'zoom_out', zoom_out);
 			zoom_out.event_on('touch_end', piano.zoom_out, piano);
 
-			//_(this).subview_add.call(this, 'octave_down', new button_text('+'));
-			//_(this).subview_add.call(this, 'octave_up', new button_text('+'));
-			//_(this).subview_add.call(this, 'zoom_in', new button_text('+'));
-			_(this).subview_add.call(this, 'piano', new spz.client.views.piano());
+			//this._subview_add.call(this, 'octave_down', new button_text('+'));
+			//this._subview_add.call(this, 'octave_up', new button_text('+'));
+			//this._subview_add.call(this, 'zoom_in', new button_text('+'));
+			this._subview_add.call(this, 'piano', new spz.client.views.piano());
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
-			var settings = __(this).settings;
+			var settings = this.__settings;
 			var bb_controls = settings.controls.bb.to_abs(bb);
 			var bb_piano = settings.piano.to_abs(bb);
 
-			_(this).subview_get.call(this, 'piano').bb_set(bb_piano);
-			_(this).subview_get.call(this, 'zoom_out').bb_set(bb_controls);
+			this._subview_get.call(this, 'piano').bb_set(bb_piano);
+			this._subview_get.call(this, 'zoom_out').bb_set(bb_controls);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 		};
 	});
 
-	spz.client.views.piano = spz.client.views.base.subclass(function(prototype, _, _protected, __, __private) {
-		__private.settings = {
+	spz.client.views.piano = function ()
+		__settings = {
 			key_spacing: 0.02,
 			key_white_color: 'rgb(255, 255, 255)',
 			key_white_down_color: 'rgb(10, 46, 166)',
@@ -338,56 +301,56 @@
 			key_black_outline: 'rgb(50, 50, 50)'
 		};
 
-		prototype.init = function () {
+		constructor: function () {
 			this.super.init.call(this);
-			__(this).midi_note_number_to_bb = {};
-			__(this).buffer_dirty = false;
-			__(this).recalc_midi_note_number_to_bb.call(this);
-			__(this).buffer = document.createElement('canvas');
-			__(this).buffer.width = _(this).bb.width;
-			__(this).buffer.height = _(this).bb.height;
-			__(this).buffer_ctx = __(this).buffer.getContext('2d');
+			this.__midi_note_number_to_bb = {};
+			this.__buffer_dirty = false;
+			this.__recalc_midi_note_number_to_bb.call(this);
+			this.__buffer = document.createElement('canvas');
+			this.__buffer.width = this._bb.width;
+			this.__buffer.height = this._bb.height;
+			this.__buffer_ctx = this.__buffer.getContext('2d');
 
-			this.event_on.call(this, 'touch_start', __(this).callback_touch_start);
-			this.event_on.call(this, 'touch_move', __(this).callback_touch_move);
-			this.event_on.call(this, 'touch_end', __(this).callback_touch_end);
-			this.event_on.call(this, 'touch_leave', __(this).callback_touch_leave);
-			this.event_on.call(this, 'touch_cancel', __(this).callback_touch_cancel);
+			this.event_on.call(this, 'touch_start', this.__callback_touch_start);
+			this.event_on.call(this, 'touch_move', this.__callback_touch_move);
+			this.event_on.call(this, 'touch_end', this.__callback_touch_end);
+			this.event_on.call(this, 'touch_leave', this.__callback_touch_leave);
+			this.event_on.call(this, 'touch_cancel', this.__callback_touch_cancel);
 		};
 
-		prototype.zoom_out = function () {
+		zoom_out = function () {
 			if (spz.client.ui.keyboard.midi_octaves_displayed < 6) {
 				spz.client.ui.keyboard.midi_octaves_displayed += 1;
-				__(this).recalc_midi_note_number_to_bb.call(this);
-				_(this).dirty = true;
+				this.__recalc_midi_note_number_to_bb.call(this);
+				this._dirty = true;
 			}
 		};
 
-		prototype.bb_set = function (bb) {
+		bb_set = function (bb) {
 			this.super.bb_set.call(this, bb);
-			__(this).buffer.width = _(this).bb.width;
-			__(this).buffer.height = _(this).bb.height;
-			__(this).recalc_midi_note_number_to_bb.call(this);
+			this.__buffer.width = this._bb.width;
+			this.__buffer.height = this._bb.height;
+			this.__recalc_midi_note_number_to_bb.call(this);
 		};
 
-		_protected.redraw = function (canvas_ctx) {
+		_redraw = function (canvas_ctx) {
 			console.log('redraw keyboard');
 
-			var bb = _(this).bb;
-			var settings = __(this).settings;
+			var bb = this._bb;
+			var settings = this.__settings;
 
 			// get canvas dimensions
 			var canvas_width = bb.width;
 			var canvas_height = bb.height;
-			var canvas_buffer = __(this).buffer;
+			var canvas_buffer = this.__buffer;
 
 			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
 			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
 
-			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
+			var midi_note_number_to_bb = this.__midi_note_number_to_bb;
 
 			// redraw buffer if we need to
-			if (__(this).buffer_dirty) {
+			if (this.__buffer_dirty) {
 				// resize buffer
 				canvas_buffer.width = canvas_width;
 				canvas_buffer.height = canvas_height;
@@ -424,7 +387,7 @@
 				}
 
 				// mark canvas buffer as clean
-				__(this).buffer_dirty = false;
+				this.__buffer_dirty = false;
 			}
 
 			// fill in canvas from buffer
@@ -470,25 +433,25 @@
 			}
 		};
 
-		__private.callback_touch_start = function (event) {
+		__callback_touch_start = function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch = event.changedTouches[i];
 				var touch_id = touch.identifier;
-				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
+				var midi_note_number = this.__touch_to_midi_note_number.call(this, touch);
 				if (!(midi_note_number in spz.client.control.midi_note_number_to_touch_id)) {
 					spz.server.midi_note_number_on(midi_note_number);
 					spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
 					spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
-					_(this).dirty = true;
+					this._dirty = true;
 				}
 			}
 		};
 
-		__private.callback_touch_move = function (event) {
+		__callback_touch_move = function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch = event.changedTouches[i];
 				var touch_id = touch.identifier;
-				var midi_note_number = __(this).touch_to_midi_note_number.call(this, touch);
+				var midi_note_number = this.__touch_to_midi_note_number.call(this, touch);
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
 					var midi_note_number_old = spz.client.control.touch_id_to_midi_note_number[touch_id];
 					if (midi_note_number_old !== midi_note_number) {
@@ -498,13 +461,13 @@
 						spz.server.midi_note_number_on(midi_note_number);
 						spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
 						spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
-						_(this).dirty = true;
+						this._dirty = true;
 					}
 				}
 			}
 		};
 
-		__private.callback_touch_end = function (event) {
+		__callback_touch_end = function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
@@ -512,12 +475,12 @@
 					spz.server.midi_note_number_off(midi_note_number);
 					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
 					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-					_(this).dirty = true;
+					this._dirty = true;
 				}
 			}
 		};
 
-		__private.callback_touch_leave = function (event) {
+		__callback_touch_leave = function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
@@ -525,12 +488,12 @@
 					spz.server.midi_note_number_off(midi_note_number);
 					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
 					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-					_(this).dirty = true;
+					this._dirty = true;
 				}
 			}
 		};
 
-		__private.callback_touch_cancel = function (event) {
+		__callback_touch_cancel = function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
@@ -538,20 +501,20 @@
 					spz.server.midi_note_number_off(midi_note_number);
 					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
 					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
-					_(this).dirty = true;
+					this._dirty = true;
 				}
 			}
 		};
 
-		__private.touch_to_midi_note_number = function (touch) {
-			var bb = _(this).bb;
+		__touch_to_midi_note_number = function (touch) {
+			var bb = this._bb;
 			var x = touch.clientX - bb.x;
 			var y = touch.clientY - bb.y;
 
 			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
 			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
 
-			var midi_note_number_to_bb = __(this).midi_note_number_to_bb;
+			var midi_note_number_to_bb = this.__midi_note_number_to_bb;
 
 			// try black keys
 			for (var midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
@@ -581,12 +544,12 @@
 			return null;
 		};
 
-		__private.recalc_midi_note_number_to_bb = function () {
+		__recalc_midi_note_number_to_bb = function () {
 			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
 			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
-			var bb = _(this).bb;
+			var bb = this._bb;
 
-			__(this).midi_note_number_to_bb = {};
+			this.__midi_note_number_to_bb = {};
 
 			// count white keys
 			var keys_white_total = 0;
@@ -637,10 +600,10 @@
 					keys_black_calculated++;
 				}
 
-				__(this).midi_note_number_to_bb[midi_note_number] = bb_key;
+				this.__midi_note_number_to_bb[midi_note_number] = bb_key;
 			}
 
-			__(this).buffer_dirty = true;
+			this.__buffer_dirty = true;
 		};
 	});
 
