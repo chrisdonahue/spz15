@@ -1,4 +1,4 @@
-#N canvas 650 23 1217 704 10;
+#N canvas 26 68 1217 704 10;
 #X obj 85 373 *~ 2;
 #X obj 85 402 -~ 1;
 #X obj 154 370 *~ 2;
@@ -132,7 +132,7 @@ This patch is used as an abstraction in various examples.;
 #X obj 85 664 clip~ -1 1;
 #X obj 369 228 * 5;
 #X obj 372 205 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 190 1;
+-1 -1 13 1;
 #X obj 154 311 +~;
 #X obj 85 311 -~;
 #X obj 180 292 sig~;
@@ -142,10 +142,10 @@ This patch is used as an abstraction in various examples.;
 #X obj 85 508 bp~ 1000 5;
 #X obj 100 194 osc~;
 #X obj 103 173 hsl 128 15 0 100 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 63 1;
+-1 -1 0 1;
 #X obj 100 238 *~;
 #X obj 142 213 hsl 128 15 0 100 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 635 1;
+-1 -1 0 1;
 #X obj 85 260 +~;
 #X text 207 156 LFO;
 #X text 184 196 comment;
@@ -315,27 +315,27 @@ This patch is used as an abstraction in various examples.;
 #X obj 139 193 r \$1-lfo-amount;
 #X obj 291 528 r \$1-pan;
 #X obj 660 529 vsl 15 128 0 3000 0 0 \$1-attack \$1-attack-in A 5 -7
-0 10 -245052 -1 -1 0 1;
+0 10 -245052 -1 -1 42 1;
 #X obj 679 529 vsl 15 128 10 3000 0 0 \$1-decay \$1-decay-in D 5 -7
 0 10 -245052 -1 -1 0 1;
 #X obj 721 529 vsl 15 128 10 3000 0 0 \$1-release \$1-release-in R
-5 -7 0 10 -245052 -1 -1 4205 1;
+5 -7 0 10 -245052 -1 -1 382 1;
 #X obj 700 529 vsl 15 128 0 100 0 0 \$1-sustain \$1-sustain-in S 5
 -7 0 10 -245052 -1 -1 9525 1;
 #X obj 637 528 vsl 15 128 0 127 0 0 \$1-velocity \$1-velocity-in vel
-0 -7 0 10 -245052 -1 -1 12700 1;
+0 -7 0 10 -245052 -1 -1 10000 1;
 #X obj 755 528 vsl 15 128 0 1 0 0 \$1-pan \$1-pan-in pan 0 -7 0 10
 -262072 -1 -1 6350 1;
 #X obj 564 529 vsl 15 128 0 100 0 0 \$1-lfo-freq \$1-lfo-freq-in freq
--2 -7 0 10 -196352 -1 -1 63 1;
+-2 -7 0 10 -196352 -1 -1 0 1;
 #X obj 591 529 vsl 15 128 0 100 0 0 \$1-lfo-amount \$1-lfo-amount-in
-amount 0 -7 0 10 -196352 -1 -1 635 1;
-#X text 564 663 LFO;
-#X text 636 662 ENV;
-#X text 755 663 PAN;
+amount 0 -7 0 10 -196352 -1 -1 0 1;
+#X text 561 496 LFO;
+#X text 636 494 ENV;
+#X text 750 493 PAN;
 #X obj 866 169 loadbang;
 #X text 862 153 load defaults;
-#X floatatom 621 494 5 0 0 0 midi_note #1-notenum-in #1-notenum;
+#X floatatom 849 680 5 0 0 0 midi_note #1-notenum-in #1-notenum;
 #X obj 86 49 inlet;
 #X obj 86 131 mtof~;
 #X obj 86 108 r \$1-notenum;
@@ -349,7 +349,7 @@ amount 0 -7 0 10 -196352 -1 -1 635 1;
 #X obj 912 119 s \$1-sustain-in;
 #X obj 1014 118 s \$1-release-in;
 #X obj 1122 118 s \$1-pan-in;
-#X text 547 684 these sliders have send-symbol: \$1-parameter and receive-symbol:
+#X text 746 758 these sliders have send-symbol: \$1-parameter and receive-symbol:
 \$1-paramter-in;
 #X obj 86 85 s \$1-notenum-in;
 #X obj 912 84 * 100;
@@ -369,26 +369,22 @@ amount 0 -7 0 10 -196352 -1 -1 635 1;
 #X obj 375 81 exp;
 #X obj 375 100 * 0.0001;
 #X obj 375 62 * 13.8155;
-#X msg 369 184 0.015;
 #X obj 611 321 / 127;
 #X text 440 323 WILL TAKE THIS OUT!!!!! -->;
-#X msg 141 291 0;
-#X obj 141 273 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
--1 -1;
 #X obj 141 253 sel 1;
 #X obj 578 296 t f f;
 #X obj 154 339 phasor~;
 #X obj 85 336 phasor~;
 #X obj 85 797 synth_rev;
-#X text 790 663 REVERB;
+#X text 788 492 REVERB;
 #X obj 791 527 hsl 100 12 0 1 0 0 \$1-rev-roomsize \$1-rev-roomsize-in
-roomsize 0 -5 0 10 -204786 -1 -1 990 1;
+roomsize 0 -5 0 10 -204786 -1 -1 99 1;
 #X obj 792 556 hsl 100 12 0 1 0 0 \$1-rev-damping \$1-rev-damping-in
-damping 0 -5 0 10 -204786 -1 -1 0 1;
+damping 0 -5 0 10 -204786 -1 -1 990 1;
 #X obj 793 585 hsl 100 12 0 1 0 0 \$1-rev-width \$1-rev-width-in width
-0 -5 0 10 -204786 -1 -1 0 1;
+0 -5 0 10 -204786 -1 -1 4950 1;
 #X obj 793 616 hsl 100 12 0 1 0 0 \$1-rev-wetdry \$1-rev-wetdry-in
-wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
+wetdry 0 -5 0 10 -204786 -1 -1 99 1;
 #X obj 832 641 tgl 15 0 \$1-rev-freeze \$1-rev-freeze-in freeze -40
 7 0 10 -204786 -1 -1 0 1;
 #X obj 102 685 r \$1-rev-roomsize;
@@ -407,19 +403,27 @@ wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
 #X obj 1465 40 inlet;
 #X obj 1577 38 inlet;
 #X obj 1698 39 inlet;
-#X msg 866 218 \; \$1-lfo-freq-in 0 \; \$1-lfo-amount-in 0 \; \$1-velocity-in
-100 \; \$1-attack-in 0 \; \$1-decay-in 10 \; \$1-sustain-in 75 \; \$1-release-in
-100 \; \$1-pan-in 0.5 \; \$1-rev-roomsize-in 0.01 \; \$1-rev-damping-in
-0.1 \; \$1-rev-width-in 0.5 \; \$1-rev-wetdry-in 0.01 \; \$1-rev-freeze-in
-0;
 #X obj 156 849 expr~ 1.5*$v1*(1-0.333333*$v1*$v1);
 #X obj 85 825 expr~ 1.5*$v1*(1-0.333333*$v1*$v1);
 #X obj 85 468 *~ 0.1;
+#X msg 369 184 0.001;
+#X msg 146 280 0;
+#X msg 866 218 \; \$1-lfo-freq-in 0 \; \$1-lfo-amount-in 0 \; \$1-velocity-in
+100 \; \$1-attack-in 10 \; \$1-decay-in 10 \; \$1-sustain-in 75 \;
+\$1-release-in 100 \; \$1-pan-in 0.5 \; \$1-rev-roomsize-in 0.01 \;
+\$1-rev-damping-in 0.1 \; \$1-rev-width-in 0.5 \; \$1-rev-wetdry-in
+0.01 \; \$1-rev-freeze-in 0;
+#X obj 350 720 animal_sampler;
+#X obj 1830 38 inlet;
+#X obj 1830 119 s \$1-animal-in;
+#X obj 565 678 hradio 24 1 0 9 \$1-animal \$1-animal-in ANIMALS 0 -5
+0 10 -191407 -1 -1 0;
+#X obj 350 696 r \$1-animal;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 2 0 3 0;
 #X connect 3 0 4 1;
-#X connect 4 0 158 0;
+#X connect 4 0 154 0;
 #X connect 7 0 8 0;
 #X connect 7 0 9 0;
 #X connect 8 0 21 0;
@@ -431,15 +435,15 @@ wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
 #X connect 16 0 17 0;
 #X connect 16 0 30 1;
 #X connect 20 0 7 1;
-#X connect 21 0 132 0;
+#X connect 21 0 129 0;
 #X connect 22 0 26 0;
 #X connect 22 0 27 0;
 #X connect 23 0 22 0;
-#X connect 24 0 130 0;
-#X connect 25 0 131 0;
+#X connect 24 0 127 0;
+#X connect 25 0 128 0;
 #X connect 26 0 24 1;
 #X connect 27 0 25 1;
-#X connect 29 0 123 0;
+#X connect 29 0 155 0;
 #X connect 30 0 7 0;
 #X connect 31 0 33 0;
 #X connect 32 0 31 0;
@@ -447,7 +451,7 @@ wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
 #X connect 34 0 33 1;
 #X connect 35 0 24 0;
 #X connect 35 0 25 0;
-#X connect 38 0 132 1;
+#X connect 38 0 129 1;
 #X connect 40 0 10 0;
 #X connect 40 1 12 0;
 #X connect 41 0 119 0;
@@ -466,8 +470,8 @@ wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
 #X connect 56 0 55 0;
 #X connect 60 0 59 1;
 #X connect 62 0 32 0;
-#X connect 63 0 129 0;
-#X connect 64 0 124 0;
+#X connect 63 0 126 0;
+#X connect 64 0 123 0;
 #X connect 65 0 20 2;
 #X connect 66 0 20 3;
 #X connect 67 0 20 4;
@@ -484,7 +488,7 @@ wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
 #X connect 91 0 105 0;
 #X connect 92 0 35 0;
 #X connect 93 0 92 0;
-#X connect 94 0 155 0;
+#X connect 94 0 157 0;
 #X connect 106 0 101 0;
 #X connect 108 0 110 0;
 #X connect 109 0 108 0;
@@ -501,29 +505,32 @@ wetdry 0 -5 0 10 -204786 -1 -1 4950 1;
 #X connect 120 0 121 0;
 #X connect 121 0 96 0;
 #X connect 122 0 120 0;
-#X connect 123 0 23 0;
-#X connect 124 0 20 1;
-#X connect 126 0 130 1;
-#X connect 126 0 131 1;
-#X connect 127 0 126 0;
-#X connect 128 0 127 0;
-#X connect 129 0 20 0;
-#X connect 129 1 128 0;
-#X connect 130 0 2 0;
-#X connect 131 0 0 0;
-#X connect 132 0 157 0;
-#X connect 132 1 156 0;
-#X connect 139 0 132 2;
-#X connect 140 0 132 3;
-#X connect 141 0 132 4;
-#X connect 142 0 132 5;
-#X connect 143 0 132 6;
-#X connect 145 0 146 0;
+#X connect 123 0 20 1;
+#X connect 125 0 156 0;
+#X connect 126 0 20 0;
+#X connect 126 1 125 0;
+#X connect 127 0 2 0;
+#X connect 128 0 0 0;
+#X connect 129 0 153 0;
+#X connect 129 1 152 0;
+#X connect 136 0 129 2;
+#X connect 137 0 129 3;
+#X connect 138 0 129 4;
+#X connect 139 0 129 5;
+#X connect 140 0 129 6;
+#X connect 142 0 143 0;
+#X connect 148 0 144 0;
+#X connect 149 0 145 0;
+#X connect 150 0 146 0;
 #X connect 151 0 147 0;
-#X connect 152 0 148 0;
-#X connect 153 0 149 0;
-#X connect 154 0 150 0;
-#X connect 156 0 15 0;
-#X connect 157 0 5 0;
-#X connect 158 0 30 0;
-#X coords 0 -1 1 1 355 210 1 550 470;
+#X connect 152 0 15 0;
+#X connect 153 0 5 0;
+#X connect 154 0 30 0;
+#X connect 155 0 23 0;
+#X connect 156 0 128 1;
+#X connect 156 0 127 1;
+#X connect 158 0 129 0;
+#X connect 158 0 129 1;
+#X connect 159 0 160 0;
+#X connect 162 0 158 0;
+#X coords 0 -1 1 1 355 250 1 550 470;
