@@ -22,20 +22,42 @@
 	spz.server.callbacks.error = function (event) {
 		console.log('socket error: ' + event.data);
 	};
-	
-	spz.server.osc_send = function (message_type, parameters) {
+
+	spz.server.osc = {};
+
+	spz.server.osc.send = function (message_address, parameters) {
 		spz.server.socket_osc.send({
-			address: '/' + message_type,
+			address: message_address,
 			args: [spz.client.fingerprint].concat(parameters)
 		});
 	};
 
-	spz.server.midi_note_number_on = function (midi_note_number) {
-		spz.server.osc_send('on', [midi_note_number, 127]);
+	var views_available = spz.defines.views_available;
+	spz.server.osc[views_available.keyboard] = {};
+	spz.server.osc[views_available.envelope] = {};
+
+	spz.server.osc[views_available.keyboard].midi_note_number_on = function (midi_note_number) {
+		spz.server.osc.send('/on', [midi_note_number]);
 	};
 
-	spz.server.midi_note_number_off = function (midi_note_number) {
-		spz.server.osc_send('off', [midi_note_number]);
+	spz.server.osc[views_available.keyboard].midi_note_number_off = function (midi_note_number) {
+		spz.server.osc.send('/off', [midi_note_number]);
+	};
+
+	spz.server.osc[views_available.envelope].change_attack = function (value_new) {
+		spz.server.osc.send('/env/attack', [value_new]);
+	};
+
+	spz.server.osc[views_available.envelope].change_decay = function (value_new) {
+		spz.server.osc.send('/env/decay', [value_new]);
+	};
+
+	spz.server.osc[views_available.envelope].change_sustain = function (value_new) {
+		spz.server.osc.send('/env/sustain', [value_new]);
+	};
+
+	spz.server.osc[views_available.envelope].change_release = function (value_new) {
+		spz.server.osc.send('/env/release', [value_new]);
 	};
 
 	/*

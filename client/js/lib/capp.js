@@ -265,6 +265,13 @@ window.capp = window.capp || {};
 			return this._bb.contains(x, y);
 		},
 
+		event_trigger__: function (event_type) {
+			var callbacks = this.__event_callbacks;
+			if (event_type in callbacks) {
+				callbacks[event_type].apply(this, (Array.prototype.slice.call(arguments, 1)));
+			}
+		},
+
 		event_on__: function (event_type, callback) {
 			this.__event_callbacks[event_type] = callback;
 		},
