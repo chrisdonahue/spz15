@@ -1,6 +1,8 @@
 (function (spz, capp) {
 	spz.client.components = spz.client.components || {};
 
+	var views_available = spz.defines.views_available;
+
 	/*
 		text button component
 	*/
@@ -58,8 +60,7 @@
 			this.__max = max || 1.0;
 			this.__range = this.__max - this.__min;
 			this.step_set(step || 0.0);
-
-			this.__value_internal = this.__value_external_to_internal(value || 0.0);
+			this.value_set(value || this.__min);
 
 			this.__held = false;
 
@@ -70,6 +71,14 @@
 			this.event_on__('touch_end', this.__callback_touch_end);
 			this.event_on__('touch_leave', this.__callback_touch_end);
 			this.event_on__('touch_cancel', this.__callback_touch_end);
+		},
+
+		value_set: function (_value) {
+			this.__value_internal = this.__value_external_to_internal(_value);
+		},
+
+		value_get: function () {
+			return this.__value_internal_to_external(this.__value_internal);
 		},
 
 		step_set: function (_step) {
@@ -137,23 +146,29 @@
 		},
 
 		__callback_touch_start: function (event) {
-			console.log('start');
 			this.__held = true;
+			var value_internal_old = this.__value_internal;
 			touch_event = event.changedTouches[0];
 			this.__value_internal = this.__canvas_pos_to_value_internal(touch_event.clientX, touch_event.clientY);
-			this._dirty = true;
-		},
-
-		__callback_touch_move: function (event) {
-			if (this.__held) {
-				touch_event = event.changedTouches[0];
-				this.__value_internal = this.__canvas_pos_to_value_internal(touch_event.clientX, touch_event.clientY);
+			if (value_internal_old !== this.__value_internal) {
+				this.event_trigger__('slider_change', this);
 				this._dirty = true;
 			}
 		},
 
+		__callback_touch_move: function (event) {
+			if (this.__held) {
+				var value_internal_old = this.__value_internal;
+				touch_event = event.changedTouches[0];
+				this.__value_internal = this.__canvas_pos_to_value_internal(touch_event.clientX, touch_event.clientY);
+				if (value_internal_old !== this.__value_internal) {
+					this.event_trigger__('slider_change', this);
+					this._dirty = true;
+				}
+			}
+		},
+
 		__callback_touch_end: function (event) {
-			console.log('end');
 			this.__held = false;
 		}
 	});
@@ -315,7 +330,7 @@
 		}
 	});
 
-	spz.client.components[spz.defines.views_available.keyboard] = capp.component.extend({
+	spz.client.components[views_available.keyboard] = capp.component.extend({
 		constructor: function () {
 			capp.component.prototype.constructor.call(this);
 
@@ -359,7 +374,7 @@
 		}
 	});
 
-	spz.client.components[spz.defines.views_available.envelope] = capp.component.extend({
+	spz.client.components[views_available.envelope] = capp.component.extend({
 		constructor: function () {
 			capp.component.prototype.constructor.call(this);
 
@@ -367,9 +382,18 @@
 			this.__settings.color = spz.helpers.ui.color_random();
 
 			this.__sliders = {};
-			this.__sliders.attack = new slider(spz.client.control[spz.defines.views_available.envelope].attack, 0.0, 1.0, 0.2);
+			this.__sliders.attack = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
+			this.__sliders.decay = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
+			this.__sliders.sustain = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
+			this.__sliders.release = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
 
 			this._subcomponent_add__('slider_attack', this.__sliders.attack);
+
+			this.__sliders.attack.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.envelope].attack = value_new;
+				spz.server.osc[views_available.envelope].change_attack(value_new);
+			});
 		},
 
 		bb_set: function (bb) {
@@ -387,7 +411,7 @@
 		}
 	});
 
-	spz.client.components[spz.defines.views_available.patch] = capp.component.extend({
+	spz.client.components[views_available.patch] = capp.component.extend({
 		constructor: function () {
 			capp.component.prototype.constructor.call(this);
 
@@ -408,7 +432,7 @@
 		}
 	});
 
-	spz.client.components[spz.defines.views_available.sounds] = capp.component.extend({
+	spz.client.components[views_available.sounds] = capp.component.extend({
 		constructor: function () {
 			capp.component.prototype.constructor.call(this);
 
@@ -429,7 +453,7 @@
 		}
 	});
 
-	spz.client.components[spz.defines.views_available.output] = capp.component.extend({
+	spz.client.components[views_available.output] = capp.component.extend({
 		constructor: function () {
 			capp.component.prototype.constructor.call(this);
 
@@ -605,7 +629,7 @@
 				var touch_id = touch.identifier;
 				var midi_note_number = this.__touch_to_midi_note_number(touch);
 				if (!(midi_note_number in this.__midi_note_number_to_touch_id)) {
-					spz.server.midi_note_number_on(midi_note_number);
+					spz.server.osc[views_available.keyboard].midi_note_number_on(midi_note_number);
 					this.__midi_note_number_to_touch_id[midi_note_number] = touch_id;
 					this.__touch_id_to_midi_note_number[touch_id] = midi_note_number;
 					this._dirty = true;
@@ -621,10 +645,10 @@
 				if (touch_id in this.__touch_id_to_midi_note_number) {
 					var midi_note_number_old = this.__touch_id_to_midi_note_number[touch_id];
 					if (midi_note_number_old !== midi_note_number) {
-						spz.server.midi_note_number_off(midi_note_number_old);
+						spz.server.osc[views_available.keyboard].midi_note_number_off(midi_note_number_old);
 						delete this.__midi_note_number_to_touch_id[midi_note_number_old];
 						delete this.__touch_id_to_midi_note_number[touch_id];
-						spz.server.midi_note_number_on(midi_note_number);
+						spz.server.osc[views_available.keyboard].midi_note_number_on(midi_note_number);
 						this.__midi_note_number_to_touch_id[midi_note_number] = touch_id;
 						this.__touch_id_to_midi_note_number[touch_id] = midi_note_number;
 						this._dirty = true;
@@ -638,7 +662,7 @@
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in this.__touch_id_to_midi_note_number) {
 					var midi_note_number = this.__touch_id_to_midi_note_number[touch_id];
-					spz.server.midi_note_number_off(midi_note_number);
+					spz.server.osc[views_available.keyboard].midi_note_number_off(midi_note_number);
 					delete this.__midi_note_number_to_touch_id[midi_note_number];
 					delete this.__touch_id_to_midi_note_number[touch_id];
 					this._dirty = true;
@@ -651,7 +675,7 @@
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in this.__touch_id_to_midi_note_number) {
 					var midi_note_number = this.__touch_id_to_midi_note_number[touch_id];
-					spz.server.midi_note_number_off(midi_note_number);
+					spz.server.osc[views_available.keyboard].midi_note_number_off(midi_note_number);
 					delete this.__midi_note_number_to_touch_id[midi_note_number];
 					delete this.__touch_id_to_midi_note_number[touch_id];
 					this._dirty = true;
@@ -664,7 +688,7 @@
 				var touch_id = event.changedTouches[i].identifier;
 				if (touch_id in this.__touch_id_to_midi_note_number) {
 					var midi_note_number = this.__touch_id_to_midi_note_number[touch_id];
-					spz.server.midi_note_number_off(midi_note_number);
+					spz.server.osc[views_available.keyboard].midi_note_number_off(midi_note_number);
 					delete this.__midi_note_number_to_touch_id[midi_note_number];
 					delete this.__touch_id_to_midi_note_number[touch_id];
 					this._dirty = true;
