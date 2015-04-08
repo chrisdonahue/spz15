@@ -5,6 +5,7 @@ window.spz = window.spz || {};
 	spz.defines = {};
 	spz.client = {};
 	spz.client.options = {};
+	spz.client.options.control = {};
 	spz.client.options.ui = {};
 	spz.client.resources = {};
 	spz.server = {};
@@ -28,12 +29,17 @@ window.spz = window.spz || {};
 		output: 'output'
 	};
 
-	// client options
+	// client control options
+	spz.client.options.control[views_available.keyboard] = {
+		midi_note_velocity: 127
+	};
+
+	// client ui options
 	spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
 	spz.client.options.ui.view_current = views_available.keyboard;
-	spz.client.options.ui.keyboard = {};
-	spz.client.options.ui.keyboard.midi_octave = 5;
-	spz.client.options.ui.keyboard.midi_octaves_displayed = 1;
+	spz.client.options.ui[views_available.keyboard] = {};
+	spz.client.options.ui[views_available.keyboard].midi_octave = 5;
+	spz.client.options.ui[views_available.keyboard].midi_octaves_displayed = 1;
 
 	// resources
 	spz.client.resources.view_icons = {};

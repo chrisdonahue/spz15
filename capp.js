@@ -133,8 +133,8 @@ window.capp = window.capp || {};
 			var canvas_ctx = this.__canvas_ctx = canvas.getContext('2d');
 
 			// event handling
+			var that = this;
 			if (window_supports_touch_events) {
-				var that = this;
 				var event_touch_shim = function (callback) {
 					return function (event) {
 						event.consumed = false;
@@ -146,14 +146,13 @@ window.capp = window.capp || {};
 					}
 				};
 
-				canvas.ontouchstart = event_touch_shim(root.event_callback_get('touch_start'));
-				canvas.ontouchmove = event_touch_shim(root.event_callback_get('touch_move'));
-				canvas.ontouchend = event_touch_shim(root.event_callback_get('touch_end'));
-				canvas.ontouchleave = event_touch_shim(root.event_callback_get('touch_leave'));
-				canvas.ontouchcancel = event_touch_shim(root.event_callback_get('touch_cancel'));
+				canvas.ontouchstart = event_touch_shim(this.__event_callback('touch_start'));
+				canvas.ontouchmove = event_touch_shim(this.__event_callback('touch_move'));
+				canvas.ontouchend = event_touch_shim(this.__event_callback('touch_end'));
+				canvas.ontouchleave = event_touch_shim(this.__event_callback('touch_leave'));
+				canvas.ontouchcancel = event_touch_shim(this.__event_callback('touch_cancel'));
 			}
 			else {
-				var that = this;
 				var event_mouse_to_touch_shim = function (callback) {
 					return function(event) {
 						event.consumed = false;
@@ -168,14 +167,24 @@ window.capp = window.capp || {};
 					};
 				}
 
-				canvas.onmousedown = event_mouse_to_touch_shim(root.event_callback_get('touch_start'));
-				canvas.onmousemove = event_mouse_to_touch_shim(root.event_callback_get('touch_move'));
-				canvas.onmouseup = event_mouse_to_touch_shim(root.event_callback_get('touch_end'));
-				canvas.onmouseleave = event_mouse_to_touch_shim(root.event_callback_get('touch_leave'));
+				canvas.onmousedown = event_mouse_to_touch_shim(this.__event_callback('touch_start'));
+				canvas.onmousemove = event_mouse_to_touch_shim(this.__event_callback('touch_move'));
+				canvas.onmouseup = event_mouse_to_touch_shim(this.__event_callback('touch_end'));
+				canvas.onmouseleave = event_mouse_to_touch_shim(this.__event_callback('touch_leave'));
 			}
 
-			var component_root = this.__component_root = null;
-			var component_root_bb = this.__component_root_bb = new capp.bb_abs();
+			this.__component_root = null;
+			this.__component_root_bb = new capp.bb_abs();
+		},
+
+		__event_callback: function (event_type) {
+			var that = this;
+			return function( event) {
+				var component_root = that.__component_root;
+				if (component_root !== null) {
+					component_root.event_callback_get__(event_type)(event);
+				}
+			};
 		},
 
 		resize: function (width, height) {
@@ -186,17 +195,19 @@ window.capp = window.capp || {};
 
 			// change root width
 			var component_root = this.__component_root;
-			var component_root_bb = this.__component_root_bb;
-			component_root_bb.width = width;
-			component_root_bb.height = height;
-			component_root.bb_set(component_root_bb);
+			if (component_root !== null) {
+				var component_root_bb = this.__component_root_bb;
+				component_root_bb.width = width;
+				component_root_bb.height = height;
+				component_root.bb_set(component_root_bb);
+			}
 		},
 
 		redraw: function (force) {
 			force = force || false;
 			var component_root = this.__component_root;
 			if (component_root !== null) {
-				component_root.redraw(this.__canvas_ctx, force);
+				component_root.redraw__(this.__canvas_ctx, force);
 			}
 		}
 	});
@@ -215,25 +226,25 @@ window.capp = window.capp || {};
 			this.__visible = false;
 		},
 
-		subcomponent_add: function (subcomponent_id, subcomponent) {
+		subcomponent_add__: function (subcomponent_id, subcomponent) {
 			this.__subcomponents[subcomponent_id] = subcomponent;
 			this.__subcomponents_count++;
 		},
 
-		subcomponent_get: function (subcomponent_id) {
+		subcomponent_get__: function (subcomponent_id) {
 			return this.__subcomponents[subcomponent_id];
 		},
 
-		subcomponent_remove: function (subcomponent_id) {
+		subcomponent_remove__: function (subcomponent_id) {
 			delete this.__subcomponents[subcomponent_id];
 			this.__subcomponents_count--;
 		},
 
-		subcomponents_count: function () {
+		subcomponents_count__: function () {
 			return this.__subcomponents_count;
 		},
 
-		bb_get: function () {
+		bb_get__: function () {
 			return this._bb;
 		},
 
@@ -242,7 +253,7 @@ window.capp = window.capp || {};
 			this._dirty = true;
 		},
 
-		contains: function (x, y) {
+		contains__: function (x, y) {
 			return this._bb.contains(x, y);
 		},
 
@@ -271,15 +282,15 @@ window.capp = window.capp || {};
 			}
 		},
 
-		visible_get: function () {
+		visible_get__: function () {
 			return this.__visible;
 		},
 
-		visible_set: function (visible_new) {
+		visible_set__: function (visible_new) {
 			this.__visible = visible_new;
 		},
 
-		redraw: function (canvas_ctx, force) {
+		redraw__: function (canvas_ctx, force) {
 			force = force || false;
 
 			if (force) {

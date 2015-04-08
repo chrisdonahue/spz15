@@ -24,12 +24,6 @@
 	
 	// control
 	$.extend(spz.client.control, spz.client.options.control);
-	$.extend(spz.client.control, {
-			midi_note_number_to_touch_id: {},
-			touch_id_to_midi_note_number: {},
-			midi_note_velocity: 100
-	});
-	
 
 	// ui
 	$.extend(spz.client.ui, spz.client.options.ui);
@@ -53,7 +47,7 @@
 
 	var callback_document_ready = function () {
 		// create canvas app
-		var app = spz.client.app = new spz.client.views.canvas_app('client_ui', spz.client.views.root);
+		var app = spz.client.app = new capp.canvas('client_ui');
 
 		// load SVG resources
 		var DOMURL = window.URL || window.webkitURL || window;
