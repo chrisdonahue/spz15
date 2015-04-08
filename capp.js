@@ -177,6 +177,11 @@ window.capp = window.capp || {};
 			this.__component_root_bb = new capp.bb_abs();
 		},
 
+		component_root_set: function (component_root) {
+			this.__component_root = component_root;
+			component_root.bb_set(this.__component_root_bb);
+		},
+
 		__event_callback: function (event_type) {
 			var that = this;
 			return function( event) {
@@ -193,12 +198,14 @@ window.capp = window.capp || {};
 			canvas.width = width;
 			canvas.height = height;
 
+			// change root bounding box width
+			var component_root_bb = this.__component_root_bb;
+			component_root_bb.width = width;
+			component_root_bb.height = height;
+
 			// change root width
 			var component_root = this.__component_root;
 			if (component_root !== null) {
-				var component_root_bb = this.__component_root_bb;
-				component_root_bb.width = width;
-				component_root_bb.height = height;
 				component_root.bb_set(component_root_bb);
 			}
 		},
@@ -286,8 +293,8 @@ window.capp = window.capp || {};
 			return this.__visible;
 		},
 
-		visible_set__: function (visible_new) {
-			this.__visible = visible_new;
+		visible_set__: function (_visible) {
+			this.__visible = _visible;
 		},
 
 		redraw__: function (canvas_ctx, force) {
@@ -330,6 +337,49 @@ window.capp = window.capp || {};
 		},
 
 		_redraw: function (canvas_ctx) {}
+	});
+
+	/*
+		text button component
+	*/
+
+	var button_text = capp.button_text = capp.component.extend({
+		__settings: {
+			rounded_corner: 20
+		},
+
+		constructor: function (text) {
+			capp.component.prototype.constructor.call(this);
+			this.__text = text;
+		},
+
+		_redraw: function (canvas_ctx) {
+			var bb = this._bb;
+			var text = this.__text;
+
+			// draw button
+			canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, this.__settings.rounded_corner).fill();
+
+			// text options
+			canvas_ctx.fillStyle = 'rgb(255, 255, 255)';
+			canvas_ctx.textBaseline = 'middle';
+			canvas_ctx.textAlign = 'center';
+
+			// fit text
+			var text_height = bb.height * 0.8;
+			canvas_ctx.font = text_height.toString() + 'pt monospace';
+			var text_width = canvas_ctx.measureText(text).width;
+			var max_width = bb.width * 0.8;
+			while (text_width > max_width) {
+				text_height *= 0.8;
+				canvas_ctx.font = text_height.toString() + 'pt monospace';
+				text_width = canvas_ctx.measureText(text).width;
+			}
+
+			// draw text
+			canvas_ctx.fillText(this.__text, bb.x + (bb.width / 2), bb.y + (bb.height / 2));
+		}
 	});
 
 })(window.capp, window._);
