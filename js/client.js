@@ -54,28 +54,30 @@
 		app.component_root_set(new spz.client.components.root());
 
 		// load SVG resources
-		var DOMURL = window.URL || window.webkitURL || window;
-		for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
-			var view_id = spz.client.ui.views_enabled[i];
-			// hack for some weird Chrome closure bug...
-			var callback_done_generator = function (_view_id) {
-				return function (data) {
-					//spz.client.resources.view_icons[_view_id].data = data;
-					var image = new Image();
-					var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
-					var url = DOMURL.createObjectURL(svg);
-					image.onload = function () {
-						spz.client.app.redraw(true);
+		if (spz.client.ui.view_icons_use) {
+			var DOMURL = window.URL || window.webkitURL || window;
+			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
+				var view_id = spz.client.ui.views_enabled[i];
+				// hack for some weird Chrome closure bug...
+				var callback_done_generator = function (_view_id) {
+					return function (data) {
+						//spz.client.resources.view_icons[_view_id].data = data;
+						var image = new Image();
+						var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+						var url = DOMURL.createObjectURL(svg);
+						image.onload = function () {
+							spz.client.app.redraw(true);
+						};
+						spz.client.resources.view_icons[_view_id].image = image;
+						image.src = url;
 					};
-					spz.client.resources.view_icons[_view_id].image = image;
-					image.src = url;
-				};
+				}
+				$.ajax({
+					url: spz.client.resources.view_icons[view_id].url,
+					type: 'GET',
+					dataType: 'text'
+				}).done(callback_done_generator(view_id));
 			}
-			$.ajax({
-				url: spz.client.resources.view_icons[view_id].url,
-				type: 'GET',
-				dataType: 'text'
-			}).done(callback_done_generator(view_id));
 		}
 
 		// remove scrollbars
