@@ -7,6 +7,47 @@
 		text button component
 	*/
 
+	var labeled_slider = capp.component.extend({
+		constructor: function (text) {
+
+		},
+	});
+
+	var label = capp.component.extend({
+		__settings: {
+			font: 'pt monospace'
+		},
+
+		constructor: function (text) {
+			capp.component.prototype.constructor.call(this);
+			this.__text = text;
+		},
+
+		_redraw: function (canvas_ctx) {
+			var bb = this._bb;
+			var text = this.__text;
+
+			// text options
+			canvas_ctx.fillStyle = 'rgb(255, 255, 255)';
+			canvas_ctx.textBaseline = 'middle';
+			canvas_ctx.textAlign = 'center';
+
+			// fit text
+			var text_height = bb.height;
+			canvas_ctx.font = text_height.toString() + 'pt monospace';
+			var text_width = canvas_ctx.measureText(text).width;
+			var max_width = bb.width;
+			while (text_width > max_width) {
+				text_height *= 0.9;
+				canvas_ctx.font = text_height.toString() + 'pt monospace';
+				text_width = canvas_ctx.measureText(text).width;
+			}
+
+			// draw text
+			canvas_ctx.fillText(this.__text, bb.x + (bb.width / 2), bb.y + (bb.height / 2));
+		}
+	});
+
 	var button_text = capp.component.extend({
 		__settings: {
 			rounded_corner: 20
@@ -263,6 +304,7 @@
 		section_change: function (section_new) {
 			this._subcomponent_remove__('section_' + spz.client.ui.view_current);
 			spz.client.ui.view_current = section_new;
+			this.__sections_cache[spz.client.ui.view_current].bb_set(this.__section_bb);
 			this._subcomponent_add__('section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
 			this._dirty = true;
 		},
@@ -381,25 +423,68 @@
 			this.__settings = {};
 			this.__settings.color = spz.helpers.ui.color_random();
 
-			this.__sliders = {};
-			this.__sliders.attack = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
-			this.__sliders.decay = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
-			this.__sliders.sustain = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
-			this.__sliders.release = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0, 0.2);
+			this.__settings.label_width_rel = 0.2;
 
+			this.__sliders = {};
+			this.__sliders.attack = new slider(spz.client.control[views_available.envelope].attack, 0.0, 1.0);
+			this.__sliders.decay = new slider(spz.client.control[views_available.envelope].decay, 0.0, 1.0);
+			this.__sliders.sustain = new slider(spz.client.control[views_available.envelope].sustain, 0.0, 1.0);
+			this.__sliders.release = new slider(spz.client.control[views_available.envelope].release, 0.0, 1.0);
+
+			this._subcomponent_add__('label_attack', new label('Atk'));
 			this._subcomponent_add__('slider_attack', this.__sliders.attack);
+			this._subcomponent_add__('label_decay', new label('Dcy'));
+			this._subcomponent_add__('slider_decay', this.__sliders.decay);
+			this._subcomponent_add__('label_sustain', new label('Sus'));
+			this._subcomponent_add__('slider_sustain', this.__sliders.sustain);
+			this._subcomponent_add__('label_release', new label('Rel'));
+			this._subcomponent_add__('slider_release', this.__sliders.release);
 
 			this.__sliders.attack.event_on__('slider_change', function (slider) {
 				var value_new = slider.value_get();
 				spz.client.control[views_available.envelope].attack = value_new;
 				spz.server.osc[views_available.envelope].change_attack(value_new);
 			});
+
+			this.__sliders.decay.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.envelope].decay = value_new;
+				spz.server.osc[views_available.envelope].change_decay(value_new);
+			});
+
+			this.__sliders.sustain.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.envelope].sustain = value_new;
+				spz.server.osc[views_available.envelope].change_sustain(value_new);
+			});
+
+			this.__sliders.release.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.envelope].release = value_new;
+				spz.server.osc[views_available.envelope].change_release(value_new);
+			});
 		},
 
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
 
-			this.__sliders.attack.bb_set(bb);
+			var label_attack_bb = (new capp.bb_rel(0.0, 0.0, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_attack').bb_set(label_attack_bb);
+			var label_decay_bb = (new capp.bb_rel(0.0, 0.25, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_decay').bb_set(label_decay_bb);
+			var label_sustain_bb = (new capp.bb_rel(0.0, 0.5, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_sustain').bb_set(label_sustain_bb);
+			var label_release_bb = (new capp.bb_rel(0.0, 0.75, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_release').bb_set(label_release_bb);
+
+			var slider_attack_bb = (new capp.bb_rel(0.2, 0.0, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.attack.bb_set(slider_attack_bb);
+			var slider_decay_bb = (new capp.bb_rel(0.2, 0.25, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.decay.bb_set(slider_decay_bb);
+			var slider_sustain_bb = (new capp.bb_rel(0.2, 0.5, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.sustain.bb_set(slider_sustain_bb);
+			var slider_release_bb = (new capp.bb_rel(0.2, 0.75, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.release.bb_set(slider_release_bb);
 		},
 
 		_redraw: function (canvas_ctx) {
