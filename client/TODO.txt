@@ -1,2 +1,3 @@
 oh god:
 	http://joshgertzen.com/object-oriented-super-class-method-calling-with-javascript/
+	https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
