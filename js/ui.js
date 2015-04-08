@@ -1,11 +1,11 @@
 (function (spz, capp) {
-	spz.client.views = spz.client.views || {};
+	spz.client.components = spz.client.components || {};
 
 	/*
 		text button component
 	*/
 
-	var button_text = capp.button_text = capp.component.extend({
+	var button_text = capp.component.extend({
 		__settings: {
 			rounded_corner: 20
 		},
@@ -44,9 +44,11 @@
 		}
 	});
 
-	spz.client.views.root = function ()
-		__settings: {
-		},
+	var slider = capp.component.extend({
+	});
+
+	spz.client.components.root = capp.component.extend({
+		__settings: {},
 		__settings[spz.defines.orientation.landscape] = {},
 		__settings[spz.defines.orientation.portrait] = {};
 		__settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
@@ -84,8 +86,8 @@
 			this.__sections_cache = {};
 			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
 				var view_id = spz.client.ui.views_enabled[i];
-				this._subview_add.call(this, 'nav_button_' + view_id, new spz.client.views.nav_button(this, view_id));
-				this.__sections_cache[view_id] = new spz.client.views[view_id]();
+				this._subview_add.call(this, 'nav_button_' + view_id, new spz.client.components.nav_button(this, view_id));
+				this.__sections_cache[view_id] = new spz.client.components[view_id]();
 			}
 
 			// add current section subview
@@ -157,7 +159,7 @@
 		};
 	});
 
-	spz.client.views.nav_button = function ()
+	spz.client.components.nav_button = capp.component.extend({
 		// here i discovered that assigning attributes on __private
 		// are passed by reference to all children's private prototypes instead of copied :/
 
@@ -200,7 +202,7 @@
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.envelope] = function ()
+	spz.client.components[spz.defines.views_available.envelope] = capp.component.extend({
 		__settings = {
 		};
 
@@ -221,7 +223,7 @@
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.patch] = function ()
+	spz.client.components[spz.defines.views_available.patch] = capp.component.extend({
 		__settings = {
 		};
 
@@ -242,7 +244,7 @@
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.output] = function ()
+	spz.client.components[spz.defines.views_available.output] = capp.component.extend({
 		__settings = {
 		};
 
@@ -263,7 +265,7 @@
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.sounds] = function ()
+	spz.client.components[spz.defines.views_available.sounds] = capp.component.extend({
 		__settings = {
 		};
 
@@ -284,7 +286,7 @@
 		};
 	});
 
-	spz.client.views[spz.defines.views_available.keyboard] = function ()
+	spz.client.components[spz.defines.views_available.keyboard] = capp.component.extend({
 		__settings = {};
 
 		__settings.controls = {};
@@ -306,7 +308,7 @@
 			var that = this;
 
 			// piano
-			var piano = new spz.client.views.piano();
+			var piano = new spz.client.components.piano();
 
 			// zoom out button
 			var zoom_out = new button_text('-');
@@ -316,7 +318,7 @@
 			//this._subview_add.call(this, 'octave_down', new button_text('+'));
 			//this._subview_add.call(this, 'octave_up', new button_text('+'));
 			//this._subview_add.call(this, 'zoom_in', new button_text('+'));
-			this._subview_add.call(this, 'piano', new spz.client.views.piano());
+			this._subview_add.call(this, 'piano', new spz.client.components.piano());
 		};
 
 		bb_set = function (bb) {
@@ -333,7 +335,8 @@
 		};
 	});
 
-	spz.client.views.piano = function ()
+	/*
+	spz.client.components.piano = function ()
 		__settings = {
 			key_spacing: 0.02,
 			key_white_color: 'rgb(255, 255, 255)',
@@ -649,5 +652,6 @@
 			this.__buffer_dirty = true;
 		};
 	});
+	*/
 
 })(window.spz, window.capp);
