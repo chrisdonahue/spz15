@@ -45,6 +45,117 @@
 	});
 
 	var slider = capp.component.extend({
+		constructor: function (value, min, max, step) {
+			capp.component.prototype.constructor.call(this);
+
+			this.__settings = {};
+			this.__settings.bar_color = 'rgb(127, 127, 127)';
+			this.__settings.bar_corner_rounded = 5;
+			this.__settings.handle_color = 'rgb(0, 0, 0)';
+			this.__settings.handle_corner_rounded = 5;
+
+			this.__min = min || 0.0;
+			this.__max = max || 1.0;
+			this.__range = this.__max - this.__min;
+			this.step_set(step || 0.0);
+
+			this.__value_internal = this.__value_external_to_internal(value || 0.0);
+
+			this.__held = false;
+
+			_.bindAll(this, '__callback_touch_start', '__callback_touch_move', '__callback_touch_end');
+
+			this.event_on__('touch_start', this.__callback_touch_start);
+			this.event_on__('touch_move', this.__callback_touch_move);
+			this.event_on__('touch_end', this.__callback_touch_end);
+			this.event_on__('touch_leave', this.__callback_touch_end);
+			this.event_on__('touch_cancel', this.__callback_touch_end);
+		},
+
+		step_set: function (_step) {
+			this.__step_internal = this.__value_external_to_internal(_step);
+			if (_step === 0.0) {
+				this.__settings.handle_width_rel = 0.2;
+			}
+			else {
+				this.__settings.handle_width_rel = this.__step_internal;
+			}
+		},
+
+		step_get: function () {
+			return this.__value_internal_to_external(this.__step);
+		},
+
+		_redraw: function (canvas_ctx) {
+			console.log('redrawing slider');
+
+			var settings = this.__settings;
+			var bb = this._bb;
+
+			// draw bar (full bb for now)
+			canvas_ctx.fillStyle = settings.bar_color;
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, this.__settings.bar_corner_rounded).fill();
+
+			// draw handle
+			canvas_ctx.fillStyle = settings.handle_color;
+			var handle_width = bb.width * this.__settings.handle_width_rel;
+			var handle_x = this.__value_internal_to_canvas_pos(this.__value_internal);
+			canvas_ctx.roundRect(handle_x, bb.y, handle_width, bb.height, this.__settings.handle_corner_rounded).fill();
+		},
+
+		// internal values are [0, 1]
+		// external values are [this.__min, this.__max]
+		__value_internal_to_external: function (value_internal) {
+			return spz.helpers.clip((value_internal * (this.__range)) + this.__min, this.__min, this.__max);
+		},
+
+		__value_external_to_internal: function (value_external) {
+			return (value_external - this.__min) / this.__range;
+		},
+
+		__canvas_pos_to_value_internal: function (canvas_x) {
+			var bb = this._bb;
+			var handle_width_rel_half = this.__settings.handle_width_rel / 2;
+			var x = canvas_x - bb.x;
+			var range_map = spz.helpers.range_map_linear(handle_width_rel_half, bb.width - handle_width_rel_half, 0.0, 1.0);
+			var value = x * range_map.m + range_map.b;
+			var step = this.__step_internal;
+			if (step !== 0.0) {
+				value = Math.round(value / step) * step;
+			}
+			value = spz.helpers.clip(value, 0.0, 1.0);
+
+			return value;
+		},
+
+		__value_internal_to_canvas_pos: function (canvas_x) {
+			var bb = this._bb;
+			var offset_x_max = ((1.0 - this.__settings.handle_width_rel) * bb.width);
+			var offset_x = this.__value_internal * offset_x_max;
+			offset_x = spz.helpers.clip(offset_x, 0, offset_x_max);
+			return bb.x + offset_x;
+		},
+
+		__callback_touch_start: function (event) {
+			console.log('start');
+			this.__held = true;
+			touch_event = event.changedTouches[0];
+			this.__value_internal = this.__canvas_pos_to_value_internal(touch_event.clientX, touch_event.clientY);
+			this._dirty = true;
+		},
+
+		__callback_touch_move: function (event) {
+			if (this.__held) {
+				touch_event = event.changedTouches[0];
+				this.__value_internal = this.__canvas_pos_to_value_internal(touch_event.clientX, touch_event.clientY);
+				this._dirty = true;
+			}
+		},
+
+		__callback_touch_end: function (event) {
+			console.log('end');
+			this.__held = false;
+		}
 	});
 
 	spz.client.components.root = capp.component.extend({
@@ -254,10 +365,17 @@
 
 			this.__settings = {};
 			this.__settings.color = spz.helpers.ui.color_random();
+
+			this.__sliders = {};
+			this.__sliders.attack = new slider(spz.client.control[spz.defines.views_available.envelope].attack, 0.0, 1.0, 0.2);
+
+			this._subcomponent_add__('slider_attack', this.__sliders.attack);
 		},
 
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
+
+			this.__sliders.attack.bb_set(bb);
 		},
 
 		_redraw: function (canvas_ctx) {

@@ -229,7 +229,7 @@ window.capp = window.capp || {};
 			this._bb = new capp.bb_abs();
 			this._dirty = false;
 			this.__subcomponents = {};
-			this.__subcomponents_cuont = 0;
+			this.__subcomponents_count = 0;
 			this.__event_callbacks = {};
 			this.__visible = false;
 		},
