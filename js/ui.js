@@ -245,11 +245,6 @@
 
 			this._subcomponent_get__('keyboard').bb_set(bb_keyboard);
 			this._subcomponent_get__('zoom_out').bb_set(bb_controls);
-		},
-
-		_redraw: function (canvas_ctx) {
-			console.log('redraw keyboard');
-			var bb = this._bb;
 		}
 	});
 
