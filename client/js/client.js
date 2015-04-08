@@ -48,11 +48,10 @@
 
 	var callback_document_ready = function () {
 		// create canvas app
-		var app = spz.client.app = new capp.canvas('client_ui');
+		var app = spz.client.app = new capp.canvas('spz_app_canvas');
 
 		// create root component
-		var test_button = new capp.button_text('the ultimate test');
-		app.component_root_set(test_button);
+		app.component_root_set(new spz.views.root());
 
 		// load SVG resources
 		var DOMURL = window.URL || window.webkitURL || window;
