@@ -41,7 +41,7 @@ window.spz = window.spz || {};
 	};
 
 	// client ui options
-	spz.client.options.ui.view_icons_use = false;
+	spz.client.options.ui.view_icons_use = true;
 	spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
 	spz.client.options.ui.view_current = views_available.envelope;
 	spz.client.options.ui[views_available.keyboard] = {};
