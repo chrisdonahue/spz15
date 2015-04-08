@@ -2,6 +2,31 @@
 	spz.helpers = spz.helpers || {};
 
 	/*
+		general
+	*/
+
+	spz.helpers.range_map_linear = function(w, x, y, z) {
+		var m = (z - y) / (x - w);
+		var b = (y - (w * m));
+		return {
+			m: m,
+			b: b
+		};
+	}
+
+	spz.helpers.clip = function(value, min, max) {
+		var value_clipped = value;
+		if (value < min) {
+			value_clipped = min;
+		}
+		else if (value > max) {
+			value_clipped = max;
+		}
+
+		return value_clipped;
+	}
+
+	/*
 		midi
 	*/
 	
