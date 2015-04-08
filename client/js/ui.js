@@ -86,12 +86,12 @@
 			this.__sections_cache = {};
 			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
 				var view_id = spz.client.ui.views_enabled[i];
-				this._subcomponent_add__.call(this, 'nav_button_' + view_id, new spz.client.components.nav_button(this, view_id));
+				this._subcomponent_add__('nav_button_' + view_id, new spz.client.components.nav_button(this, view_id));
 				this.__sections_cache[view_id] = new spz.client.components[view_id]();
 			}
 
 			// add current section subcomponent
-			this._subcomponent_add__.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
+			this._subcomponent_add__('section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
 		},
 
 		bb_set: function (bb) {
@@ -110,7 +110,7 @@
 					if (i === spz.client.ui.views_enabled.length - 1) {
 						nav_button_height += nav_button_height_remainder;
 					}
-					this._subcomponent_get__.call(this, 'nav_button_' + view_id).bb_set(new capp.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
+					this._subcomponent_get__('nav_button_' + view_id).bb_set(new capp.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
 					nav_button_height_used += nav_button_height;
 				}
 			}
@@ -123,7 +123,7 @@
 					if (i === spz.client.ui.views_enabled.length - 1) {
 						nav_button_width += nav_button_width_remainder;
 					}
-					this._subcomponent_get__.call(this, 'nav_button_' + view_id).bb_set(new capp.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
+					this._subcomponent_get__('nav_button_' + view_id).bb_set(new capp.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
 					nav_button_width_used += nav_button_width;
 				}
 			}
@@ -135,9 +135,9 @@
 		},
 
 		section_change: function (section_new) {
-			this._subcomponent_remove__.call(this, 'section_' + spz.client.ui.view_current);
+			this._subcomponent_remove__('section_' + spz.client.ui.view_current);
 			spz.client.ui.view_current = section_new;
-			this._subcomponent_add__.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
+			this._subcomponent_add__('section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
 			this._dirty = true;
 		},
 
@@ -173,7 +173,7 @@
 			this.__settings.rounded_corner = 20;
 			this.__settings.color = spz.helpers.ui.color_random();
 
-			this.event_on__.call(this, 'touch_end', _.bind(this.__callback_touch_end, this));
+			this.event_on__('touch_end', _.bind(this.__callback_touch_end, this));
 		},
 
 		bb_set: function (bb) {
@@ -188,12 +188,14 @@
 			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, this.__settings.rounded_corner).fill();
 
 			// draw svg
-			if (spz.client.resources.view_icons[this.__view_id].image !== null) {
-				var dimension_short = Math.min(bb.width, bb.height);
-				var svg_size = dimension_short * 0.75;
-				var svg_x = bb.x + (bb.width - svg_size) / 2;
-				var svg_y = bb.y + (bb.height - svg_size) / 2;
-				canvas_ctx.drawImage(spz.client.resources.view_icons[this.__view_id].image, svg_x, svg_y, svg_size, svg_size);
+			if (spz.client.ui.view_icons_use) {
+				if (spz.client.resources.view_icons[this.__view_id].image !== null) {
+					var dimension_short = Math.min(bb.width, bb.height);
+					var svg_size = dimension_short * 0.75;
+					var svg_x = bb.x + (bb.width - svg_size) / 2;
+					var svg_y = bb.y + (bb.height - svg_size) / 2;
+					canvas_ctx.drawImage(spz.client.resources.view_icons[this.__view_id].image, svg_x, svg_y, svg_size, svg_size);
+				}
 			}
 		},
 
@@ -207,19 +209,47 @@
 			capp.component.prototype.constructor.call(this);
 
 			this.__settings = {};
-			this.__settings.color = spz.helpers.ui.color_random();
+			this.__settings.controls = {}
+			this.__settings.controls.bb = new capp.bb_rel(
+				0.0,
+				0.0,
+				1.0,
+				0.2
+			);
+			this.__settings.keyboard = new capp.bb_rel(
+				0.0,
+				0.2,
+				1.0,
+				0.8
+			);
+
+			// keyboard
+			var _keyboard = new keyboard();
+
+			// zoom out button
+			var zoom_out = new button_text('-');
+			this._subcomponent_add__('zoom_out', zoom_out);
+			zoom_out.event_on__('touch_end', _keyboard.zoom_out);
+
+			//this._subcomponent_add__.call(this, 'octave_down', new button_text('+'));
+			//this._subcomponent_add__.call(this, 'octave_up', new button_text('+'));
+			//this._subcomponent_add__.call(this, 'zoom_in', new button_text('+'));
+			this._subcomponent_add__('keyboard', _keyboard);
 		},
 
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
+			var settings = this.__settings;
+			var bb_controls = settings.controls.bb.to_abs(bb);
+			var bb_keyboard = settings.keyboard.to_abs(bb);
+
+			this._subcomponent_get__('keyboard').bb_set(bb_keyboard);
+			this._subcomponent_get__('zoom_out').bb_set(bb_controls);
 		},
 
 		_redraw: function (canvas_ctx) {
 			console.log('redraw keyboard');
 			var bb = this._bb;
-
-			canvas_ctx.fillStyle = this.__settings.color;
-			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
 		}
 	});
 
@@ -307,102 +337,56 @@
 		}
 	});
 
-	/*
-	spz.client.components[spz.defines.views_available.keyboard] = capp.component.extend({
-		__settings = {};
-
-		__settings.controls = {};
-		__settings.controls.bb = new capp.bb_rel(
-			0.0,
-			0.0,
-			1.0,
-			0.2
-		);
-		__settings.piano = new capp.bb_rel(
-			0.0,
-			0.2,
-			1.0,
-			0.8
-		);
-
+	var keyboard = capp.component.extend({
 		constructor: function () {
-			this.super.init.call(this);
-			var that = this;
+			capp.component.prototype.constructor.call(this);
 
-			// piano
-			var piano = new spz.client.components.piano();
+			this.__settings = {
+				key_spacing: 0.02,
+				key_white_color: 'rgb(255, 255, 255)',
+				key_white_down_color: 'rgb(10, 46, 166)',
+				key_white_outline: 'rgb(50, 50, 50)',
+				key_black_color: 'rgb(0, 0, 0)',
+				key_black_down_color: 'rgb(245, 209, 89)',
+				key_black_outline: 'rgb(50, 50, 50)'
+			};
 
-			// zoom out button
-			var zoom_out = new button_text('-');
-			this._subcomponent_add__.call(this, 'zoom_out', zoom_out);
-			zoom_out.event_on__('touch_end', piano.zoom_out, piano);
-
-			//this._subcomponent_add__.call(this, 'octave_down', new button_text('+'));
-			//this._subcomponent_add__.call(this, 'octave_up', new button_text('+'));
-			//this._subcomponent_add__.call(this, 'zoom_in', new button_text('+'));
-			this._subcomponent_add__.call(this, 'piano', new spz.client.components.piano());
-		};
-
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-			var settings = this.__settings;
-			var bb_controls = settings.controls.bb.to_abs(bb);
-			var bb_piano = settings.piano.to_abs(bb);
-
-			this._subcomponent_get__.call(this, 'piano').bb_set(bb_piano);
-			this._subcomponent_get__.call(this, 'zoom_out').bb_set(bb_controls);
-		};
-
-		_redraw = function (canvas_ctx) {
-		};
-	});
-	*/
-
-	/*
-	spz.client.components.piano = function ()
-		__settings = {
-			key_spacing: 0.02,
-			key_white_color: 'rgb(255, 255, 255)',
-			key_white_down_color: 'rgb(10, 46, 166)',
-			key_white_outline: 'rgb(50, 50, 50)',
-			key_black_color: 'rgb(0, 0, 0)',
-			key_black_down_color: 'rgb(245, 209, 89)',
-			key_black_outline: 'rgb(50, 50, 50)'
-		};
-
-		constructor: function () {
-			this.super.init.call(this);
 			this.__midi_note_number_to_bb = {};
 			this.__buffer_dirty = false;
-			this.__recalc_midi_note_number_to_bb.call(this);
+			this.__recalc_midi_note_number_to_bb();
 			this.__buffer = document.createElement('canvas');
 			this.__buffer.width = this._bb.width;
 			this.__buffer.height = this._bb.height;
 			this.__buffer_ctx = this.__buffer.getContext('2d');
 
-			this.event_on__.call(this, 'touch_start', this.__callback_touch_start);
-			this.event_on__.call(this, 'touch_move', this.__callback_touch_move);
-			this.event_on__.call(this, 'touch_end', this.__callback_touch_end);
-			this.event_on__.call(this, 'touch_leave', this.__callback_touch_leave);
-			this.event_on__.call(this, 'touch_cancel', this.__callback_touch_cancel);
-		};
+			_.bindAll(this, '__callback_touch_start', '__callback_touch_move', '__callback_touch_end', '__callback_touch_leave', '__callback_touch_cancel', 'zoom_out');
 
-		zoom_out = function () {
+			this.event_on__('touch_start', this.__callback_touch_start);
+			this.event_on__('touch_move', this.__callback_touch_move);
+			this.event_on__('touch_end', this.__callback_touch_end);
+			this.event_on__('touch_leave', this.__callback_touch_leave);
+			this.event_on__('touch_cancel', this.__callback_touch_cancel);
+
+			this.__touch_id_to_midi_note_number = {};
+			this.__midi_note_number_to_touch_id = {};
+		},
+
+		zoom_out: function () {
 			if (spz.client.ui.keyboard.midi_octaves_displayed < 6) {
 				spz.client.ui.keyboard.midi_octaves_displayed += 1;
-				this.__recalc_midi_note_number_to_bb.call(this);
+				this.__recalc_midi_note_number_to_bb();
 				this._dirty = true;
 			}
-		};
+		},
 
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
 			this.__buffer.width = this._bb.width;
 			this.__buffer.height = this._bb.height;
-			this.__recalc_midi_note_number_to_bb.call(this);
-		};
+			this.__recalc_midi_note_number_to_bb();
+		},
 
-		_redraw = function (canvas_ctx) {
+		_redraw: function (canvas_ctx) {
 			console.log('redraw keyboard');
 
 			var bb = this._bb;
@@ -463,7 +447,7 @@
 			canvas_ctx.drawImage(canvas_buffer, bb.x, bb.y);
 
 			// highlight selected note
-			for (var midi_note_number_string in spz.client.control.midi_note_number_to_touch_id) {
+			for (var midi_note_number_string in this.__midi_note_number_to_touch_id) {
 				var midi_note_number = Number(midi_note_number_string);
 				var key_white_is = spz.helpers.midi.note_number_key_white_is(midi_note_number);
 
@@ -500,82 +484,82 @@
 					}
 				}
 			}
-		};
+		},
 
-		__callback_touch_start = function (event) {
+		__callback_touch_start: function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch = event.changedTouches[i];
 				var touch_id = touch.identifier;
-				var midi_note_number = this.__touch_to_midi_note_number.call(this, touch);
-				if (!(midi_note_number in spz.client.control.midi_note_number_to_touch_id)) {
+				var midi_note_number = this.__touch_to_midi_note_number(touch);
+				if (!(midi_note_number in this.__midi_note_number_to_touch_id)) {
 					spz.server.midi_note_number_on(midi_note_number);
-					spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
-					spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
+					this.__midi_note_number_to_touch_id[midi_note_number] = touch_id;
+					this.__touch_id_to_midi_note_number[touch_id] = midi_note_number;
 					this._dirty = true;
 				}
 			}
-		};
+		},
 
-		__callback_touch_move = function (event) {
+		__callback_touch_move: function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch = event.changedTouches[i];
 				var touch_id = touch.identifier;
-				var midi_note_number = this.__touch_to_midi_note_number.call(this, touch);
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number_old = spz.client.control.touch_id_to_midi_note_number[touch_id];
+				var midi_note_number = this.__touch_to_midi_note_number(touch);
+				if (touch_id in this.__touch_id_to_midi_note_number) {
+					var midi_note_number_old = this.__touch_id_to_midi_note_number[touch_id];
 					if (midi_note_number_old !== midi_note_number) {
 						spz.server.midi_note_number_off(midi_note_number_old);
-						delete spz.client.control.midi_note_number_to_touch_id[midi_note_number_old];
-						delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+						delete this.__midi_note_number_to_touch_id[midi_note_number_old];
+						delete this.__touch_id_to_midi_note_number[touch_id];
 						spz.server.midi_note_number_on(midi_note_number);
-						spz.client.control.midi_note_number_to_touch_id[midi_note_number] = touch_id;
-						spz.client.control.touch_id_to_midi_note_number[touch_id] = midi_note_number;
+						this.__midi_note_number_to_touch_id[midi_note_number] = touch_id;
+						this.__touch_id_to_midi_note_number[touch_id] = midi_note_number;
 						this._dirty = true;
 					}
 				}
 			}
-		};
+		},
 
-		__callback_touch_end = function (event) {
+		__callback_touch_end: function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch_id = event.changedTouches[i].identifier;
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+				if (touch_id in this.__touch_id_to_midi_note_number) {
+					var midi_note_number = this.__touch_id_to_midi_note_number[touch_id];
 					spz.server.midi_note_number_off(midi_note_number);
-					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
-					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+					delete this.__midi_note_number_to_touch_id[midi_note_number];
+					delete this.__touch_id_to_midi_note_number[touch_id];
 					this._dirty = true;
 				}
 			}
-		};
+		},
 
-		__callback_touch_leave = function (event) {
+		__callback_touch_leave: function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch_id = event.changedTouches[i].identifier;
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+				if (touch_id in this.__touch_id_to_midi_note_number) {
+					var midi_note_number = this.__touch_id_to_midi_note_number[touch_id];
 					spz.server.midi_note_number_off(midi_note_number);
-					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
-					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+					delete this.__midi_note_number_to_touch_id[midi_note_number];
+					delete this.__touch_id_to_midi_note_number[touch_id];
 					this._dirty = true;
 				}
 			}
-		};
+		},
 
-		__callback_touch_cancel = function (event) {
+		__callback_touch_cancel: function (event) {
 			for (var i = 0; i < event.changedTouches.length; i++) {
 				var touch_id = event.changedTouches[i].identifier;
-				if (touch_id in spz.client.control.touch_id_to_midi_note_number) {
-					var midi_note_number = spz.client.control.touch_id_to_midi_note_number[touch_id];
+				if (touch_id in this.__touch_id_to_midi_note_number) {
+					var midi_note_number = this.__touch_id_to_midi_note_number[touch_id];
 					spz.server.midi_note_number_off(midi_note_number);
-					delete spz.client.control.midi_note_number_to_touch_id[midi_note_number];
-					delete spz.client.control.touch_id_to_midi_note_number[touch_id];
+					delete this.__midi_note_number_to_touch_id[midi_note_number];
+					delete this.__touch_id_to_midi_note_number[touch_id];
 					this._dirty = true;
 				}
 			}
-		};
+		},
 
-		__touch_to_midi_note_number = function (touch) {
+		__touch_to_midi_note_number: function (touch) {
 			var bb = this._bb;
 			var x = touch.clientX - bb.x;
 			var y = touch.clientY - bb.y;
@@ -611,9 +595,9 @@
 
 			// no note pressed (this shouldn't happen)
 			return null;
-		};
+		},
 
-		__recalc_midi_note_number_to_bb = function () {
+		__recalc_midi_note_number_to_bb: function () {
 			var midi_note_number_lower = spz.client.ui.keyboard.midi_octave * 12;
 			var midi_note_number_upper = midi_note_number_lower + (spz.client.ui.keyboard.midi_octaves_displayed * 12) - 1;
 			var bb = this._bb;
@@ -673,8 +657,7 @@
 			}
 
 			this.__buffer_dirty = true;
-		};
+		}
 	});
-	*/
 
 })(window.spz, window.capp);
