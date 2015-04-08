@@ -77,11 +77,12 @@ window.capp = window.capp || {};
 		with_border: function (border_x_rel, border_y_rel) {
 			var border_x = Math.floor(this.width * border_x_rel);
 			var border_y = Math.floor(this.height * border_y_rel);
-			return new capp.objects.bb_abs(
-				this.x + border_x,
-				this.y + border_y,
-				this.width - (border_x * 2.0),
-				this.height - (border_y * 2.0)
+			var border = Math.min(border_x, border_y);
+			return new capp_bb_abs(
+				this.x + border,
+				this.y + border,
+				this.width - (border * 2.0),
+				this.height - (border * 2.0)
 			);
 		}
 	});
@@ -93,7 +94,7 @@ window.capp = window.capp || {};
 
 	var capp_bb_rel = capp.bb_rel = capp_bb_base.extend({
 		inverse: function () {
-			return new capp.bb_rel(
+			return new capp_bb_rel(
 				1.0 - this.x,
 				1.0 - this.y,
 				1.0 - this.width,
@@ -103,7 +104,7 @@ window.capp = window.capp || {};
 		to_abs: function (bb_abs_instance, truncate) {
 			truncate = truncate || true;
 			if (truncate) {
-				return new capp.bb_abs(
+				return new capp_bb_abs(
 					Math.floor((this.x * bb_abs_instance.width) + bb_abs_instance.x),
 					Math.floor((this.y * bb_abs_instance.height) + bb_abs_instance.y),
 					Math.floor(this.width * bb_abs_instance.width),
@@ -111,7 +112,7 @@ window.capp = window.capp || {};
 				);
 			}
 			else {
-				return new capp.bb_abs(
+				return new capp_bb_abs(
 					Math.ceil((this.x * bb_abs_instance.width) + bb_abs_instance.x),
 					Math.ceil((this.y * bb_abs_instance.height) + bb_abs_instance.y),
 					Math.ceil(this.width * bb_abs_instance.width),
@@ -233,21 +234,21 @@ window.capp = window.capp || {};
 			this.__visible = false;
 		},
 
-		subcomponent_add__: function (subcomponent_id, subcomponent) {
+		_subcomponent_add__: function (subcomponent_id, subcomponent) {
 			this.__subcomponents[subcomponent_id] = subcomponent;
 			this.__subcomponents_count++;
 		},
 
-		subcomponent_get__: function (subcomponent_id) {
+		_subcomponent_get__: function (subcomponent_id) {
 			return this.__subcomponents[subcomponent_id];
 		},
 
-		subcomponent_remove__: function (subcomponent_id) {
+		_subcomponent_remove__: function (subcomponent_id) {
 			delete this.__subcomponents[subcomponent_id];
 			this.__subcomponents_count--;
 		},
 
-		subcomponents_count__: function () {
+		_subcomponents_count__: function () {
 			return this.__subcomponents_count;
 		},
 
@@ -279,8 +280,8 @@ window.capp = window.capp || {};
 				for (var subcomponent_id in subcomponents) {
 					var subcomponent = subcomponents[subcomponent_id];
 					var touch_event = event.changedTouches[0];
-					if (subcomponent.contains(touch_event.clientX, touch_event.clientY)) {
-						subcomponent.event_callback_get(event_type)(event);
+					if (subcomponent.contains__(touch_event.clientX, touch_event.clientY)) {
+						subcomponent.event_callback_get__(event_type)(event);
 					}
 				}
 				if (!event.consumed && event_type in callbacks) {
@@ -309,7 +310,7 @@ window.capp = window.capp || {};
 
 				for (subcomponent_id in this.__subcomponents) {
 					var subcomponent = this.__subcomponents[subcomponent_id];
-					subcomponent.redraw(canvas_ctx, true);
+					subcomponent.redraw__(canvas_ctx, true);
 				}
 			}
 			else {
@@ -323,14 +324,14 @@ window.capp = window.capp || {};
 					// force all children to redraw
 					for (subcomponent_id in this.__subcomponents) {
 						var subcomponent = this.__subcomponents[subcomponent_id];
-						subcomponent.redraw(canvas_ctx, true);
+						subcomponent.redraw__(canvas_ctx, true);
 					}
 				}
 				else {
 					// redraw all children
 					for (subcomponent_id in this.__subcomponents) {
 						var subcomponent = this.__subcomponents[subcomponent_id];
-						subcomponent.redraw(canvas_ctx, false);
+						subcomponent.redraw__(canvas_ctx, false);
 					}
 				}
 			}

@@ -48,58 +48,58 @@
 	});
 
 	spz.client.components.root = capp.component.extend({
-		__settings: {},
-		__settings[spz.defines.orientation.landscape] = {},
-		__settings[spz.defines.orientation.portrait] = {};
-		__settings[spz.defines.orientation.landscape].nav = new spz.client.objects.bb_rel(
-			0.0,
-			0.0,
-			0.2,
-			1.0
-		);
-		__settings[spz.defines.orientation.landscape].section = new spz.client.objects.bb_rel(
-			0.2,
-			0.0,
-			0.8,
-			1.0
-		);
-		__settings[spz.defines.orientation.landscape].section_border = 0.02;
-
-		__settings[spz.defines.orientation.portrait].nav = new spz.client.objects.bb_rel(
-			0.0,
-			0.0,
-			1.0,
-			0.2
-		);
-		__settings[spz.defines.orientation.portrait].section = new spz.client.objects.bb_rel(
-			0.0,
-			0.2,
-			1.0,
-			0.8
-		);
-		__settings[spz.defines.orientation.portrait].section_border = 0.02;
-
 		constructor: function () {
-			this.super.init.call(this);
+			capp.component.prototype.constructor.call(this);
 
-			// create subviews
+			// settings
+			this.__settings = {};
+			this.__settings[spz.defines.orientation.landscape] = {};
+			this.__settings[spz.defines.orientation.portrait] = {};
+			this.__settings[spz.defines.orientation.landscape].nav = new capp.bb_rel(
+				0.0,
+				0.0,
+				0.2,
+				1.0
+			);
+			this.__settings[spz.defines.orientation.landscape].section = new capp.bb_rel(
+				0.2,
+				0.0,
+				0.8,
+				1.0
+			);
+			this.__settings[spz.defines.orientation.landscape].section_border = 0.02;
+			this.__settings[spz.defines.orientation.portrait].nav = new capp.bb_rel(
+				0.0,
+				0.0,
+				1.0,
+				0.2
+			);
+			this.__settings[spz.defines.orientation.portrait].section = new capp.bb_rel(
+				0.0,
+				0.2,
+				1.0,
+				0.8
+			);
+			this.__settings[spz.defines.orientation.portrait].section_border = 0.02;
+
+			// create subcomponents
 			this.__sections_cache = {};
 			for (var i = 0; i < spz.client.ui.views_enabled.length; i++) {
 				var view_id = spz.client.ui.views_enabled[i];
-				this._subview_add.call(this, 'nav_button_' + view_id, new spz.client.components.nav_button(this, view_id));
+				this._subcomponent_add__.call(this, 'nav_button_' + view_id, new spz.client.components.nav_button(this, view_id));
 				this.__sections_cache[view_id] = new spz.client.components[view_id]();
 			}
 
-			// add current section subview
-			this._subview_add.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
-		};
+			// add current section subcomponent
+			this._subcomponent_add__.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
+		},
 
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
 
 			var settings = this.__settings[spz.client.ui.orientation];
 			var nav_bb = this.__nav_bb = this.__settings[spz.client.ui.orientation].nav.to_abs(bb);
-			this.__section_bb = settings.section.to_abs(this._bb, false).with_border(settings.section_border);
+			this.__section_bb = settings.section.to_abs(this._bb, false).with_border(settings.section_border, settings.section_border);
 
 			if (spz.client.ui.orientation === spz.defines.orientation.landscape) {
 				var nav_button_height = Math.floor(nav_bb.height / spz.client.ui.views_enabled.length);
@@ -110,7 +110,7 @@
 					if (i === spz.client.ui.views_enabled.length - 1) {
 						nav_button_height += nav_button_height_remainder;
 					}
-					this._subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
+					this._subcomponent_get__.call(this, 'nav_button_' + view_id).bb_set(new capp.bb_abs(nav_bb.x, nav_button_height_used, nav_bb.width, nav_button_height));
 					nav_button_height_used += nav_button_height;
 				}
 			}
@@ -123,25 +123,25 @@
 					if (i === spz.client.ui.views_enabled.length - 1) {
 						nav_button_width += nav_button_width_remainder;
 					}
-					this._subview_get.call(this, 'nav_button_' + view_id).bb_set(new spz.client.objects.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
+					this._subcomponent_get__.call(this, 'nav_button_' + view_id).bb_set(new capp.bb_abs(nav_button_width_used, nav_bb.y, nav_button_width, nav_bb.height));
 					nav_button_width_used += nav_button_width;
 				}
 			}
 
 			for (var subview_id in this.__sections_cache) {
-				var subview = this.__sections_cache[subview_id];
-				subview.bb_set(this.__section_bb);
+				var subcomponent = this.__sections_cache[subview_id];
+				subcomponent.bb_set(this.__section_bb);
 			}
-		};
+		},
 
-		section_change = function (section_new) {
-			this._subview_remove.call(this, 'section_' + spz.client.ui.view_current);
+		section_change: function (section_new) {
+			this._subcomponent_remove__.call(this, 'section_' + spz.client.ui.view_current);
 			spz.client.ui.view_current = section_new;
-			this._subview_add.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
+			this._subcomponent_add__.call(this, 'section_' + spz.client.ui.view_current, this.__sections_cache[spz.client.ui.view_current]);
 			this._dirty = true;
-		};
+		},
 
-		_redraw = function (canvas_ctx) {
+		_redraw: function (canvas_ctx) {
 			console.log('redraw root');
 
 			var bb = this._bb;
@@ -156,7 +156,7 @@
 			else {
 				canvas_ctx.fillRect(0, nav_bb.height, bb.width, bb.height - nav_bb.height);
 			}
-		};
+		}
 	});
 
 	spz.client.components.nav_button = capp.component.extend({
@@ -164,7 +164,7 @@
 		// are passed by reference to all children's private prototypes instead of copied :/
 
 		constructor: function (parent, view_id) {
-			this.super.init.call(this);
+			capp.component.prototype.constructor.call(this);
 
 			this.__parent = parent;
 			this.__view_id = view_id;
@@ -173,14 +173,14 @@
 			this.__settings.rounded_corner = 20;
 			this.__settings.color = spz.helpers.ui.color_random();
 
-			this.event_on.call(this, 'touch_end', this.__callback_touch_end);
-		};
+			this.event_on__.call(this, 'touch_end', _.bind(this.__callback_touch_end, this));
+		},
 
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-		};
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
+		},
 
-		_redraw = function (canvas_ctx) {
+		_redraw: function (canvas_ctx) {
 			console.log('redraw nav_button_' + this.__view_id);
 			var bb = this._bb;
 
@@ -195,108 +195,130 @@
 				var svg_y = bb.y + (bb.height - svg_size) / 2;
 				canvas_ctx.drawImage(spz.client.resources.view_icons[this.__view_id].image, svg_x, svg_y, svg_size, svg_size);
 			}
-		};
+		},
 
-		__callback_touch_end = function () {
+		__callback_touch_end: function () {
 			this.__parent.section_change(this.__view_id);
-		};
+		}
+	});
+
+	spz.client.components[spz.defines.views_available.keyboard] = capp.component.extend({
+		constructor: function () {
+			capp.component.prototype.constructor.call(this);
+
+			this.__settings = {};
+			this.__settings.color = spz.helpers.ui.color_random();
+		},
+
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
+		},
+
+		_redraw: function (canvas_ctx) {
+			console.log('redraw keyboard');
+			var bb = this._bb;
+
+			canvas_ctx.fillStyle = this.__settings.color;
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+		}
 	});
 
 	spz.client.components[spz.defines.views_available.envelope] = capp.component.extend({
-		__settings = {
-		};
-
 		constructor: function () {
-			this.super.init.call(this);
-		};
+			capp.component.prototype.constructor.call(this);
 
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-		};
+			this.__settings = {};
+			this.__settings.color = spz.helpers.ui.color_random();
+		},
 
-		_redraw = function (canvas_ctx) {
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
+		},
+
+		_redraw: function (canvas_ctx) {
 			console.log('redraw envelope');
 			var bb = this._bb;
 
-			canvas_ctx.fillStyle = 'rgb(255, 255, 0)';
+			canvas_ctx.fillStyle = this.__settings.color;
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-		};
+		}
 	});
 
 	spz.client.components[spz.defines.views_available.patch] = capp.component.extend({
-		__settings = {
-		};
-
 		constructor: function () {
-			this.super.init.call(this);
-		};
+			capp.component.prototype.constructor.call(this);
 
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-		};
+			this.__settings = {};
+			this.__settings.color = spz.helpers.ui.color_random();
+		},
 
-		_redraw = function (canvas_ctx) {
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
+		},
+
+		_redraw: function (canvas_ctx) {
 			console.log('redraw patch');
 			var bb = this._bb;
 
-			canvas_ctx.fillStyle = 'rgb(255, 0, 255)';
+			canvas_ctx.fillStyle = this.__settings.color;
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-		};
-	});
-
-	spz.client.components[spz.defines.views_available.output] = capp.component.extend({
-		__settings = {
-		};
-
-		constructor: function () {
-			this.super.init.call(this);
-		};
-
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-		};
-
-		_redraw = function (canvas_ctx) {
-			console.log('redraw output');
-			var bb = this._bb;
-
-			canvas_ctx.fillStyle = 'rgb(0, 255, 255)';
-			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-		};
+		}
 	});
 
 	spz.client.components[spz.defines.views_available.sounds] = capp.component.extend({
-		__settings = {
-		};
-
 		constructor: function () {
-			this.super.init.call(this);
-		};
+			capp.component.prototype.constructor.call(this);
 
-		bb_set = function (bb) {
-			this.super.bb_set.call(this, bb);
-		};
+			this.__settings = {};
+			this.__settings.color = spz.helpers.ui.color_random();
+		},
 
-		_redraw = function (canvas_ctx) {
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
+		},
+
+		_redraw: function (canvas_ctx) {
 			console.log('redraw sounds');
 			var bb = this._bb;
 
-			canvas_ctx.fillStyle = 'rgb(0, 127, 127)';
+			canvas_ctx.fillStyle = this.__settings.color;
 			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
-		};
+		}
 	});
 
+	spz.client.components[spz.defines.views_available.output] = capp.component.extend({
+		constructor: function () {
+			capp.component.prototype.constructor.call(this);
+
+			this.__settings = {};
+			this.__settings.color = spz.helpers.ui.color_random();
+		},
+
+		bb_set: function (bb) {
+			capp.component.prototype.bb_set.call(this, bb);
+		},
+
+		_redraw: function (canvas_ctx) {
+			console.log('redraw output');
+			var bb = this._bb;
+
+			canvas_ctx.fillStyle = this.__settings.color;
+			canvas_ctx.fillRect(bb.x, bb.y, bb.width, bb.height);
+		}
+	});
+
+	/*
 	spz.client.components[spz.defines.views_available.keyboard] = capp.component.extend({
 		__settings = {};
 
 		__settings.controls = {};
-		__settings.controls.bb = new spz.client.objects.bb_rel(
+		__settings.controls.bb = new capp.bb_rel(
 			0.0,
 			0.0,
 			1.0,
 			0.2
 		);
-		__settings.piano = new spz.client.objects.bb_rel(
+		__settings.piano = new capp.bb_rel(
 			0.0,
 			0.2,
 			1.0,
@@ -312,13 +334,13 @@
 
 			// zoom out button
 			var zoom_out = new button_text('-');
-			this._subview_add.call(this, 'zoom_out', zoom_out);
-			zoom_out.event_on('touch_end', piano.zoom_out, piano);
+			this._subcomponent_add__.call(this, 'zoom_out', zoom_out);
+			zoom_out.event_on__('touch_end', piano.zoom_out, piano);
 
-			//this._subview_add.call(this, 'octave_down', new button_text('+'));
-			//this._subview_add.call(this, 'octave_up', new button_text('+'));
-			//this._subview_add.call(this, 'zoom_in', new button_text('+'));
-			this._subview_add.call(this, 'piano', new spz.client.components.piano());
+			//this._subcomponent_add__.call(this, 'octave_down', new button_text('+'));
+			//this._subcomponent_add__.call(this, 'octave_up', new button_text('+'));
+			//this._subcomponent_add__.call(this, 'zoom_in', new button_text('+'));
+			this._subcomponent_add__.call(this, 'piano', new spz.client.components.piano());
 		};
 
 		bb_set = function (bb) {
@@ -327,13 +349,14 @@
 			var bb_controls = settings.controls.bb.to_abs(bb);
 			var bb_piano = settings.piano.to_abs(bb);
 
-			this._subview_get.call(this, 'piano').bb_set(bb_piano);
-			this._subview_get.call(this, 'zoom_out').bb_set(bb_controls);
+			this._subcomponent_get__.call(this, 'piano').bb_set(bb_piano);
+			this._subcomponent_get__.call(this, 'zoom_out').bb_set(bb_controls);
 		};
 
 		_redraw = function (canvas_ctx) {
 		};
 	});
+	*/
 
 	/*
 	spz.client.components.piano = function ()
@@ -357,11 +380,11 @@
 			this.__buffer.height = this._bb.height;
 			this.__buffer_ctx = this.__buffer.getContext('2d');
 
-			this.event_on.call(this, 'touch_start', this.__callback_touch_start);
-			this.event_on.call(this, 'touch_move', this.__callback_touch_move);
-			this.event_on.call(this, 'touch_end', this.__callback_touch_end);
-			this.event_on.call(this, 'touch_leave', this.__callback_touch_leave);
-			this.event_on.call(this, 'touch_cancel', this.__callback_touch_cancel);
+			this.event_on__.call(this, 'touch_start', this.__callback_touch_start);
+			this.event_on__.call(this, 'touch_move', this.__callback_touch_move);
+			this.event_on__.call(this, 'touch_end', this.__callback_touch_end);
+			this.event_on__.call(this, 'touch_leave', this.__callback_touch_leave);
+			this.event_on__.call(this, 'touch_cancel', this.__callback_touch_cancel);
 		};
 
 		zoom_out = function () {
@@ -617,7 +640,7 @@
 			var keys_black_calculated = 0;
 			var canvas_width_covered = 0;
 			for (midi_note_number = midi_note_number_lower; midi_note_number <= midi_note_number_upper; midi_note_number++) {
-				var bb_key = new spz.client.objects.bb_abs();
+				var bb_key = new capp.bb_abs();
 
 				// white key bounding box
 				if (spz.helpers.midi.note_number_key_white_is(midi_note_number)) {
