@@ -502,10 +502,97 @@
 
 			this.__settings = {};
 			this.__settings.color = spz.helpers.ui.color_random();
+
+			this.__settings.label_width_rel = 0.2;
+
+			this.__sliders = {};
+			this.__sliders.lfo_frequency = new slider(spz.client.control[views_available.patch].lfo.frequency, 0.0, 1.0);
+			this.__sliders.lfo_amount = new slider(spz.client.control[views_available.patch].lfo.amount, 0.0, 1.0);
+			this.__sliders.reverb_roomsize = new slider(spz.client.control[views_available.patch].reverb.roomsize.sustain, 0.0, 1.0);
+			this.__sliders.reverb_damping = new slider(spz.client.control[views_available.patch].reverb.damping, 0.0, 1.0);
+			this.__sliders.reverb_width = new slider(spz.client.control[views_available.patch].reverb.width, 0.0, 1.0);
+			this.__sliders.reverb_wetdry = new slider(spz.client.control[views_available.patch].reverb.wetdry, 0.0, 1.0);
+
+			this._subcomponent_add__('label_lfo_frequency', new label('LFO Frequency'));
+			this._subcomponent_add__('slider_lfo_frequency', this.__sliders.lfo_frequency);
+			this._subcomponent_add__('label_lfo_amount', new label('LFO Amount'));
+			this._subcomponent_add__('slider_lfo_amount', this.__sliders.lfo_amount);
+			this._subcomponent_add__('label_reverb_roomsize', new label('Reverb Size'));
+			this._subcomponent_add__('slider_reverb_roomsize', this.__sliders.reverb_roomsize);
+			this._subcomponent_add__('label_reverb_damping', new label('Reverb Damping'));
+			this._subcomponent_add__('slider_reverb_damping', this.__sliders.reverb_damping);
+			this._subcomponent_add__('label_reverb_width', new label('Reverb Width'));
+			this._subcomponent_add__('slider_reverb_width', this.__sliders.reverb_width);
+			this._subcomponent_add__('label_reverb_wetdry', new label('Reverb Wet/Dry'));
+			this._subcomponent_add__('slider_reverb_wetdry', this.__sliders.reverb_wetdry);
+
+			this.__sliders.lfo_frequency.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.patch].lfo.frequency = value_new;
+				spz.server.osc[views_available.patch].change_lfo_frequency(value_new);
+			});
+
+			this.__sliders.lfo_amount.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.patch].lfo.amount = value_new;
+				spz.server.osc[views_available.patch].change_lfo_amount(value_new);
+			});
+
+			this.__sliders.reverb_roomsize.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.patch].reverb.roomsize = value_new;
+				spz.server.osc[views_available.patch].change_reverb_roomsize(value_new);
+			});
+
+			this.__sliders.reverb_damping.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.patch].reverb.damping = value_new;
+				spz.server.osc[views_available.patch].change_reverb_damping(value_new);
+			});
+
+			this.__sliders.reverb_width.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.patch].reverb.width = value_new;
+				spz.server.osc[views_available.patch].change_reverb_width(value_new);
+			});
+
+			this.__sliders.reverb_wetdry.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.patch].reverb.wetdry = value_new;
+				spz.server.osc[views_available.patch].change_reverb_wetdry(value_new);
+			});
 		},
 
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
+
+			var height = 1/6;
+
+			var label_lfo_frequency_bb = (new capp.bb_rel(0.0, height * 0, 0.2, height)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_lfo_frequency').bb_set(label_lfo_frequency_bb);
+			var label_lfo_amount_bb = (new capp.bb_rel(0.0, height * 1, 0.2, height)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_lfo_amount').bb_set(label_lfo_amount_bb);
+			var label_reverb_roomsize_bb = (new capp.bb_rel(0.0, height * 2, 0.2, height)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_reverb_roomsize').bb_set(label_reverb_roomsize_bb);
+			var label_reverb_damping_bb = (new capp.bb_rel(0.0, height * 3, 0.2, height)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_reverb_damping').bb_set(label_reverb_damping_bb);
+			var label_reverb_width_bb = (new capp.bb_rel(0.0, height * 4, 0.2, height)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_reverb_width').bb_set(label_reverb_width_bb);
+			var label_reverb_wetdry_bb = (new capp.bb_rel(0.0, height * 5, 0.2, height)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_reverb_wetdry').bb_set(label_reverb_wetdry_bb);
+
+			var slider_lfo_frequency_bb = (new capp.bb_rel(0.2, height * 0, 0.8, height)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.lfo_frequency.bb_set(slider_lfo_frequency_bb);
+			var slider_lfo_amount_bb = (new capp.bb_rel(0.2, height * 1, 0.8, height)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.lfo_amount.bb_set(slider_lfo_amount_bb);
+			var slider_reverb_roomsize_bb = (new capp.bb_rel(0.2, height * 2, 0.8, height)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.reverb_roomsize.bb_set(slider_reverb_roomsize_bb);
+			var slider_reverb_damping_bb = (new capp.bb_rel(0.2, height * 3, 0.8, height)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.reverb_damping.bb_set(slider_reverb_damping_bb);
+			var slider_reverb_width_bb = (new capp.bb_rel(0.2, height * 4, 0.8, height)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.reverb_width.bb_set(slider_reverb_width_bb);
+			var slider_reverb_wetdry_bb = (new capp.bb_rel(0.2, height * 5, 0.8, height)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.reverb_wetdry.bb_set(slider_reverb_wetdry_bb);
 		},
 
 		_redraw: function (canvas_ctx) {
