@@ -52,7 +52,7 @@ window.spz = window.spz || {};
 		}
 	};
 	spz.client.options.control[views_available.output] = {
-		velocity: 0.85,
+		volume: 0.85,
 		pan: 0.5
 	};
 
