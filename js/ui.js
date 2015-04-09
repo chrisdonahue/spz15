@@ -87,6 +87,21 @@
 		}
 	});
 
+	var button = capp.component.extend({
+		constructor: function () {
+			capp.component.prototype.constructor.call(this);
+			this.color = 'rgb(0, 0, 0)';
+		},
+
+		_redraw: function (canvas_ctx) {
+			var bb = this._bb;
+
+			// draw button
+			canvas_ctx.fillStyle = this.color;
+			canvas_ctx.roundRect(bb.x, bb.y, bb.width, bb.height, 5).fill();
+		}
+	});
+
 	var slider = capp.component.extend({
 		constructor: function (value, min, max, step) {
 			capp.component.prototype.constructor.call(this);
@@ -610,10 +625,37 @@
 
 			this.__settings = {};
 			this.__settings.color = spz.helpers.ui.color_random();
+
+			this.__pads = {};
+			for (var i = 0; i < 9; i++) {
+				var pad = new button();
+				this.__pads[i] = pad;
+				this._subcomponent_add__(i, pad);
+				var callback_closure = (function (_i) {
+					return function(event) {
+						spz.server.osc[views_available.sounds].play_sound(_i);
+					};
+				})(i);
+				pad.event_on__('touch_start', callback_closure);
+			}
 		},
 
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
+
+			var size = 1/3;
+			var bb_rel = new capp.bb_rel(0.0, 0.0, size, size);
+			for (var j = 0; j < 3; j++) {
+				for (var i = 0; i < 3; i++) {
+					var pad = this.__pads[j * 3 + i];
+					var pad_bb = bb_rel.to_abs(bb).with_border(size * 0.2, size * 0.2);
+					pad.bb_set(pad_bb);
+					console.log(pad_bb);
+					bb_rel.x += size;
+				}
+				bb_rel.x = 0.0;
+				bb_rel.y += + size;
+			}
 		},
 
 		_redraw: function (canvas_ctx) {
