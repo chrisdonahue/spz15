@@ -392,27 +392,37 @@
 			capp.component.prototype.constructor.call(this);
 
 			this.__settings = {};
-			this.__settings.controls = {}
-			this.__settings.controls.bb = new capp.bb_rel(
-				0.0,
-				0.0,
-				1.0,
-				0.2
-			);
-			this.__settings.keyboard = new capp.bb_rel(
-				0.0,
-				0.2,
-				1.0,
-				0.8
-			);
 
 			// keyboard
 			var _keyboard = new keyboard();
 
 			// zoom out button
-			var zoom_out = new button_text('-');
-			this._subcomponent_add__('zoom_out', zoom_out);
-			zoom_out.event_on__('touch_end', _keyboard.zoom_out);
+			var button_zoom_out = new button_text('-');
+			this._subcomponent_add__('button_zoom_out', button_zoom_out);
+			button_zoom_out.event_on__('touch_end', _keyboard.zoom_out);
+
+			// zoom label
+			var label_zoom = new label('Zoom');
+			this._subcomponent_add__('label_zoom', label_zoom);
+
+			// zoom in button
+			var button_zoom_in = new button_text('+');
+			this._subcomponent_add__('button_zoom_in', button_zoom_in);
+			button_zoom_in.event_on__('touch_end', _keyboard.zoom_in);
+
+			// octave down button
+			var button_octave_down = new button_text('-');
+			this._subcomponent_add__('button_octave_down', button_octave_down);
+			button_octave_down.event_on__('touch_end', _keyboard.octave_down);
+
+			// octave label
+			var label_octave = new label('Octave');
+			this._subcomponent_add__('label_octave', label_octave);
+
+			// octave up button
+			var button_octave_up = new button_text('+');
+			this._subcomponent_add__('button_octave_up', button_octave_up);
+			button_octave_up.event_on__('touch_end', _keyboard.octave_up);
 
 			//this._subcomponent_add__.call(this, 'octave_down', new button_text('+'));
 			//this._subcomponent_add__.call(this, 'octave_up', new button_text('+'));
@@ -423,11 +433,26 @@
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
 			var settings = this.__settings;
-			var bb_controls = settings.controls.bb.to_abs(bb);
-			var bb_keyboard = settings.keyboard.to_abs(bb);
 
-			this._subcomponent_get__('keyboard').bb_set(bb_keyboard);
-			this._subcomponent_get__('zoom_out').bb_set(bb_controls);
+			var controls_bb = (new capp.bb_rel(0.0, 0.0, 1.0, 0.2)).to_abs(bb).with_border(0.05, 0.05);
+
+			var controls_grid = 1/7;
+			var button_zoom_out_bb = (new capp.bb_rel(controls_grid * 0, 0.0, controls_grid, 1.0)).to_abs(controls_bb).with_border(0.1, 0.1);
+			var label_zoom_bb = (new capp.bb_rel(controls_grid * 1, 0.0, controls_grid, 1.0)).to_abs(controls_bb).with_border(0.1, 0.1);
+			var button_zoom_in_bb = (new capp.bb_rel(controls_grid * 2, 0.0, controls_grid, 1.0)).to_abs(controls_bb).with_border(0.1, 0.1);
+			var button_octave_down_bb = (new capp.bb_rel(controls_grid * 4, 0.0, controls_grid, 1.0)).to_abs(controls_bb).with_border(0.1, 0.1);
+			var label_octave_bb = (new capp.bb_rel(controls_grid * 5, 0.0, controls_grid, 1.0)).to_abs(controls_bb).with_border(0.1, 0.1);
+			var button_octave_up_bb = (new capp.bb_rel(controls_grid * 6, 0.0, controls_grid, 1.0)).to_abs(controls_bb).with_border(0.1, 0.1);
+
+			var keyboard_bb = (new capp.bb_rel(0.0, 0.2, 1.0, 0.8)).to_abs(bb);
+
+			this._subcomponent_get__('keyboard').bb_set(keyboard_bb);
+			this._subcomponent_get__('button_zoom_out').bb_set(button_zoom_out_bb);
+			this._subcomponent_get__('label_zoom').bb_set(label_zoom_bb);
+			this._subcomponent_get__('button_zoom_in').bb_set(button_zoom_in_bb);
+			this._subcomponent_get__('button_octave_down').bb_set(button_octave_down_bb);
+			this._subcomponent_get__('label_octave').bb_set(label_octave_bb);
+			this._subcomponent_get__('button_octave_up').bb_set(button_octave_up_bb);
 		}
 	});
 
@@ -728,9 +753,11 @@
 				key_white_color: 'rgb(255, 255, 255)',
 				key_white_down_color: 'rgb(10, 46, 166)',
 				key_white_outline: 'rgb(50, 50, 50)',
+				key_white_invalid_color: 'rgb(100, 100, 100)',
 				key_black_color: 'rgb(0, 0, 0)',
 				key_black_down_color: 'rgb(245, 209, 89)',
-				key_black_outline: 'rgb(50, 50, 50)'
+				key_black_outline: 'rgb(50, 50, 50)',
+				key_black_invalid_color: 'rgb(155, 155, 155)'
 			};
 
 			this.__midi_note_number_to_bb = {};
@@ -741,7 +768,7 @@
 			this.__buffer.height = this._bb.height;
 			this.__buffer_ctx = this.__buffer.getContext('2d');
 
-			_.bindAll(this, '__callback_touch_start', '__callback_touch_move', '__callback_touch_end', '__callback_touch_leave', '__callback_touch_cancel', 'zoom_out');
+			_.bindAll(this, '__callback_touch_start', '__callback_touch_move', '__callback_touch_end', '__callback_touch_leave', '__callback_touch_cancel', 'zoom_out', 'zoom_in', 'octave_down', 'octave_up');
 
 			this.event_on__('touch_start', this.__callback_touch_start);
 			this.event_on__('touch_move', this.__callback_touch_move);
@@ -756,6 +783,30 @@
 		zoom_out: function () {
 			if (spz.client.ui.keyboard.midi_octaves_displayed < 6) {
 				spz.client.ui.keyboard.midi_octaves_displayed += 1;
+				this.__recalc_midi_note_number_to_bb();
+				this._dirty = true;
+			}
+		},
+
+		zoom_in: function () {
+			if (spz.client.ui.keyboard.midi_octaves_displayed > 1) {
+				spz.client.ui.keyboard.midi_octaves_displayed -= 1;
+				this.__recalc_midi_note_number_to_bb();
+				this._dirty = true;
+			}
+		},
+
+		octave_down: function () {
+			if (spz.client.ui.keyboard.midi_octave > 0) {
+				spz.client.ui.keyboard.midi_octave -= 1;
+				this.__recalc_midi_note_number_to_bb();
+				this._dirty = true;
+			}
+		},
+
+		octave_up: function () {
+			if (spz.client.ui.keyboard.midi_octave < 8) {
+				spz.client.ui.keyboard.midi_octave += 1;
 				this.__recalc_midi_note_number_to_bb();
 				this._dirty = true;
 			}
@@ -803,7 +854,12 @@
 					var bb_key = midi_note_number_to_bb[midi_note_number];
 					canvas_buffer_ctx.fillStyle = settings.key_white_outline;
 					canvas_buffer_ctx.fillRect(bb_key.x, bb_key.y, bb_key.width, bb_key.height);
-					canvas_buffer_ctx.fillStyle = settings.key_white_color;
+					if (spz.helpers.midi.note_number_valid(midi_note_number)) {
+						canvas_buffer_ctx.fillStyle = settings.key_white_color;
+					}
+					else {
+						canvas_buffer_ctx.fillStyle = settings.key_white_invalid_color;
+					}
 					var key_outline = Math.max(1, Math.floor(settings.key_spacing * bb_key.width));
 					canvas_buffer_ctx.fillRect(bb_key.x + key_outline, bb_key.y + key_outline, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
 				}
@@ -816,7 +872,12 @@
 					var bb_key = midi_note_number_to_bb[midi_note_number];
 					canvas_buffer_ctx.fillStyle = settings.key_black_outline;
 					canvas_buffer_ctx.fillRect(bb_key.x, bb_key.y, bb_key.width, bb_key.height);
-					canvas_buffer_ctx.fillStyle = settings.key_black_color;
+					if (spz.helpers.midi.note_number_valid(midi_note_number)) {
+						canvas_buffer_ctx.fillStyle = settings.key_black_color;
+					}
+					else {
+						canvas_buffer_ctx.fillStyle = settings.key_black_invalid_color;
+					}
 					var key_outline = Math.max(1, Math.floor(settings.key_spacing * bb_key.width));
 					canvas_buffer_ctx.fillRect(bb_key.x + key_outline, bb_key.y + key_outline, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
 				}
@@ -859,7 +920,12 @@
 						if (bb_key !== null) {
 							canvas_ctx.fillStyle = settings.key_black_outline;
 							canvas_ctx.fillRect(bb_key.x + bb.x, bb_key.y + bb.y, bb_key.width, bb_key.height);
-							canvas_ctx.fillStyle = settings.key_black_color;
+							if (spz.helpers.midi.note_number_valid(midi_note_number_adjacent)) {
+								canvas_ctx.fillStyle = settings.key_black_color;
+							}
+							else {
+								canvas_ctx.fillStyle = settings.key_black_invalid_color;
+							}
 							var key_outline = Math.max(1, Math.floor(settings.key_spacing * bb_key.width));
 							canvas_ctx.fillRect(bb_key.x + key_outline + bb.x, bb_key.y + key_outline + bb.y, bb_key.width - (key_outline * 2), bb_key.height - (key_outline * 2));
 						}
@@ -873,6 +939,9 @@
 				var touch = event.changedTouches[i];
 				var touch_id = touch.identifier;
 				var midi_note_number = this.__touch_to_midi_note_number(touch);
+				if (midi_note_number === null) {
+					return;
+				}
 				if (!(midi_note_number in this.__midi_note_number_to_touch_id)) {
 					spz.server.osc[views_available.keyboard].midi_note_number_on(midi_note_number);
 					this.__midi_note_number_to_touch_id[midi_note_number] = touch_id;
@@ -887,6 +956,9 @@
 				var touch = event.changedTouches[i];
 				var touch_id = touch.identifier;
 				var midi_note_number = this.__touch_to_midi_note_number(touch);
+				if (midi_note_number === null) {
+					return;
+				}
 				if (touch_id in this.__touch_id_to_midi_note_number) {
 					var midi_note_number_old = this.__touch_id_to_midi_note_number[touch_id];
 					if (midi_note_number_old !== midi_note_number) {
@@ -959,7 +1031,12 @@
 
 				var bb = midi_note_number_to_bb[midi_note_number];
 				if (bb.contains(x, y)) {
-					return midi_note_number;
+					if (!spz.helpers.midi.note_number_valid(midi_note_number)) {
+						return null;
+					}
+					else {
+						return midi_note_number;
+					}
 				}
 			}
 
@@ -971,7 +1048,12 @@
 
 				var bb = midi_note_number_to_bb[midi_note_number];
 				if (bb.contains(x, y)) {
-					return midi_note_number;
+					if (!spz.helpers.midi.note_number_valid(midi_note_number)) {
+						return null;
+					}
+					else {
+						return midi_note_number;
+					}
 				}
 			}
 
