@@ -645,7 +645,6 @@
 			this.__sliders.volume.event_on__('slider_change', function (slider) {
 				var value_new = slider.value_get();
 				spz.client.control[views_available.output].volume = value_new;
-				spz.server.osc[views_available.output].change_volume(value_new);
 			});
 
 			this.__sliders.pan.event_on__('slider_change', function (slider) {
