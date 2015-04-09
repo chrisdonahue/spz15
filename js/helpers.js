@@ -87,6 +87,11 @@
 		return !(spz.helpers.midi.note_number_key_white_is(midi_note_number));
 	};
 
+	spz.helpers.midi.note_number_valid = function (midi_note_number) {
+		var range = spz.defines.midi_note_number_range;
+		return midi_note_number >= range.lower && midi_note_number <= range.upper;
+	};
+
 	/*
 		ui
 	*/
