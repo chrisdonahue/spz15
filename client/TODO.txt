@@ -1,0 +1,2 @@
+ideas:
+	for event assignment, pass all events to a subcomponent if the event STARTED in that subcomponent (for doing things like rotary knobs where the touch move might leave the physical component area)
