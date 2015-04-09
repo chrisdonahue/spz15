@@ -78,7 +78,7 @@
 				console.log(disconnect);
 			}
 			if ('udp' in args) {
-				udp.client.send(disconnect);
+				udp_client.send(disconnect);
 			}
 		});
 	});
