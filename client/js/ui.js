@@ -571,14 +571,14 @@
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
 
-			var label_volume_bb = (new capp.bb_rel(0.0, 0.25, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			var label_volume_bb = (new capp.bb_rel(0.0, 0.0, 0.2, 0.5)).to_abs(bb).with_border(0.1, 0.1);
 			this._subcomponent_get__('label_volume').bb_set(label_volume_bb);
-			var label_pan_bb = (new capp.bb_rel(0.0, 0.50, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			var label_pan_bb = (new capp.bb_rel(0.0, 0.50, 0.2, 0.5)).to_abs(bb).with_border(0.1, 0.1);
 			this._subcomponent_get__('label_pan').bb_set(label_pan_bb);
 
-			var slider_volume_bb = (new capp.bb_rel(0.2, 0.25, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			var slider_volume_bb = (new capp.bb_rel(0.2, 0.0, 0.8, 0.5)).to_abs(bb).with_border(0.1, 0.1);
 			this.__sliders.volume.bb_set(slider_volume_bb);
-			var slider_pan_bb = (new capp.bb_rel(0.2, 0.50, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			var slider_pan_bb = (new capp.bb_rel(0.2, 0.50, 0.8, 0.5)).to_abs(bb).with_border(0.1, 0.1);
 			this.__sliders.pan.bb_set(slider_pan_bb);
 		},
 
