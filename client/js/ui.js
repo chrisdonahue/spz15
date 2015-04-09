@@ -543,11 +543,43 @@
 			capp.component.prototype.constructor.call(this);
 
 			this.__settings = {};
-			this.__settings.color = spz.helpers.ui.color_random();
+
+			this.__settings.label_width_rel = 0.2;
+
+			this.__sliders = {};
+			this.__sliders.volume = new slider(spz.client.control[views_available.output].volume, 0.0, 1.0, 0.05);
+			this.__sliders.pan = new slider(spz.client.control[views_available.output].pan, 0.0, 1.0, 0.1);
+
+			this._subcomponent_add__('label_volume', new label('Vol'));
+			this._subcomponent_add__('slider_volume', this.__sliders.volume);
+			this._subcomponent_add__('label_pan', new label('Pan'));
+			this._subcomponent_add__('slider_pan', this.__sliders.pan);
+
+			this.__sliders.volume.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.output].volume = value_new;
+				spz.server.osc[views_available.output].change_volume(value_new);
+			});
+
+			this.__sliders.pan.event_on__('slider_change', function (slider) {
+				var value_new = slider.value_get();
+				spz.client.control[views_available.output].pan = value_new;
+				spz.server.osc[views_available.output].change_pan(value_new);
+			});
 		},
 
 		bb_set: function (bb) {
 			capp.component.prototype.bb_set.call(this, bb);
+
+			var label_volume_bb = (new capp.bb_rel(0.0, 0.25, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_volume').bb_set(label_volume_bb);
+			var label_pan_bb = (new capp.bb_rel(0.0, 0.50, 0.2, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this._subcomponent_get__('label_pan').bb_set(label_pan_bb);
+
+			var slider_volume_bb = (new capp.bb_rel(0.2, 0.25, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.volume.bb_set(slider_volume_bb);
+			var slider_pan_bb = (new capp.bb_rel(0.2, 0.50, 0.8, 0.25)).to_abs(bb).with_border(0.1, 0.1);
+			this.__sliders.pan.bb_set(slider_pan_bb);
 		},
 
 		_redraw: function (canvas_ctx) {
