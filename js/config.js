@@ -59,7 +59,7 @@ window.spz = window.spz || {};
 	// client ui options
 	spz.client.options.ui.view_icons_use = true;
 	spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
-	spz.client.options.ui.view_current = views_available.patch;
+	spz.client.options.ui.view_current = views_available.keyboard;
 	spz.client.options.ui[views_available.keyboard] = {};
 	spz.client.options.ui[views_available.keyboard].midi_octave = 5;
 	spz.client.options.ui[views_available.keyboard].midi_octaves_displayed = 1;
