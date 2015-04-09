@@ -31,19 +31,35 @@ window.spz = window.spz || {};
 
 	// client control options
 	spz.client.options.control[views_available.keyboard] = {
-		midi_note_velocity: 127
 	};
 	spz.client.options.control[views_available.envelope] = {
-		attack: 0.01,
-		decay: 0.005,
-		sustain: 0.8,
-		release: 3.0
+		attack: 0.00333333,
+		decay: 0.00333333,
+		sustain: 0.75,
+		release: 0.0333333
+	};
+	spz.client.options.control[views_available.patch] = {
+		lfo: {
+			frequency: 0,
+			amount: 0
+		},
+		reverb: {
+			roomsize: 0.01,
+			damping: 0.1,
+			width: 0.5,
+			wetdry: 0.01,
+			freeze: 0.0
+		}
+	};
+	spz.client.options.control[views_available.output] = {
+		velocity: 0.85,
+		pan: 0.5
 	};
 
 	// client ui options
 	spz.client.options.ui.view_icons_use = true;
 	spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
-	spz.client.options.ui.view_current = views_available.envelope;
+	spz.client.options.ui.view_current = views_available.patch;
 	spz.client.options.ui[views_available.keyboard] = {};
 	spz.client.options.ui[views_available.keyboard].midi_octave = 5;
 	spz.client.options.ui[views_available.keyboard].midi_octaves_displayed = 1;

@@ -9,6 +9,7 @@
 	
 	spz.server.callbacks.open = function (event) {
 		console.log('socket open');
+		spz.server.osc.send('/connect');
 	};
 	
 	spz.server.callbacks.close = function (event) {
@@ -17,6 +18,7 @@
 	
 	spz.server.callbacks.message = function (event) {
 		console.log('socket message: ' + event.data);
+		alert(event.data);
 	};
 	
 	spz.server.callbacks.error = function (event) {
@@ -26,6 +28,7 @@
 	spz.server.osc = {};
 
 	spz.server.osc.send = function (message_address, parameters) {
+		parameters = parameters || [];
 		spz.server.socket_osc.send({
 			address: message_address,
 			args: [spz.client.fingerprint].concat(parameters)
@@ -35,6 +38,9 @@
 	var views_available = spz.defines.views_available;
 	spz.server.osc[views_available.keyboard] = {};
 	spz.server.osc[views_available.envelope] = {};
+	spz.server.osc[views_available.patch] = {};
+	spz.server.osc[views_available.sounds] = {};
+	spz.server.osc[views_available.output] = {};
 
 	spz.server.osc[views_available.keyboard].midi_note_number_on = function (midi_note_number) {
 		spz.server.osc.send('/on', [midi_note_number]);
@@ -58,6 +64,46 @@
 
 	spz.server.osc[views_available.envelope].change_release = function (value_new) {
 		spz.server.osc.send('/env/release', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_lfo_frequency = function (value_new) {
+		spz.server.osc.send('/lfo/frequency', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_lfo_amount = function (value_new) {
+		spz.server.osc.send('/lfo/amount', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_reverb_roomsize = function (value_new) {
+		spz.server.osc.send('/reverb/roomsize', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_reverb_damping = function (value_new) {
+		spz.server.osc.send('/reverb/damping', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_reverb_width = function (value_new) {
+		spz.server.osc.send('/reverb/width', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_reverb_wetdry = function (value_new) {
+		spz.server.osc.send('/reverb/wetdry', [value_new]);
+	};
+
+	spz.server.osc[views_available.patch].change_reverb_freeze = function (value_new) {
+		spz.server.osc.send('/reverb/freeze', [value_new]);
+	};
+
+	spz.server.osc[views_available.sounds].play_sound = function (sound_id) {
+		spz.server.osc.send('/pads', [sound_id]);
+	};
+
+	spz.server.osc[views_available.output].change_volume = function (value_new) {
+		spz.server.osc.send('/velocity', [value_new])
+	};
+
+	spz.server.osc[views_available.output].change_pan = function (value_new) {
+		spz.server.osc.send('/pan', [value_new])
 	};
 
 	/*
