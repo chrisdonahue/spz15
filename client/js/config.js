@@ -1,6 +1,6 @@
 window.spz = window.spz || {};
 
-(function (spz) {
+(function (spz, capp) {
 	// namespaces
 	spz.defines = {};
 	spz.client = {};
@@ -57,7 +57,12 @@ window.spz = window.spz || {};
 	};
 
 	// client ui options
-	spz.client.options.ui.view_icons_use = true;
+	if (capp.browser_type === capp.browser_types.ios) {
+		spz.client.options.ui.view_icons_use = false;
+	}
+	else {
+		spz.client.options.ui.view_icons_use = true;
+	}
 	spz.client.options.ui.views_enabled = [views_available.keyboard, views_available.envelope, views_available.patch, views_available.sounds, views_available.output];
 	spz.client.options.ui.view_current = views_available.keyboard;
 	spz.client.options.ui[views_available.keyboard] = {};
@@ -83,4 +88,4 @@ window.spz = window.spz || {};
 	// server options
     spz.server.options.ip = 'cdonahue.me';
 	spz.server.options.port = 1234;
-})(window.spz);
+})(window.spz, window.capp);

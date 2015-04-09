@@ -4,7 +4,7 @@ window.capp = window.capp || {};
 	var capp_base = function () {};
 
 	/*
-		extend shim
+		shims
 	*/
 
 	// stolen from backbone.js who stole it from goog.inherits
@@ -40,6 +40,22 @@ window.capp = window.capp || {};
 
 		return child;
 	};
+
+	// 	detect browser
+	var browser_types = capp.browser_types = {
+		ios: 'ios',
+		android: 'android',
+		other: 'other'
+	};
+
+	capp.browser_type = browser_types.other;
+
+	if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+		capp.browser_type = browser_types.ios;
+	}
+	else if (/(android)/i.test(navigator.userAgent)) {
+		capp.browser_type = browser_types.android;
+	}
 
 	/*
 		point
