@@ -43,7 +43,7 @@
 	spz.server.osc[views_available.output] = {};
 
 	spz.server.osc[views_available.keyboard].midi_note_number_on = function (midi_note_number) {
-		spz.server.osc.send('/on', [midi_note_number]);
+		spz.server.osc.send('/on', [midi_note_number, spz.client.control[views_available.output].volume]);
 	};
 
 	spz.server.osc[views_available.keyboard].midi_note_number_off = function (midi_note_number) {
@@ -96,10 +96,6 @@
 
 	spz.server.osc[views_available.sounds].play_sound = function (sound_id) {
 		spz.server.osc.send('/pads', [sound_id]);
-	};
-
-	spz.server.osc[views_available.output].change_volume = function (value_new) {
-		spz.server.osc.send('/velocity', [value_new])
 	};
 
 	spz.server.osc[views_available.output].change_pan = function (value_new) {
