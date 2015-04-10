@@ -380,6 +380,29 @@
 					canvas_ctx.drawImage(spz.client.resources.view_icons[this.__view_id].image, svg_x, svg_y, svg_size, svg_size);
 				}
 			}
+			// draw text
+			else {
+				// text options
+				canvas_ctx.fillStyle = 'rgb(0, 0, 0)';
+				canvas_ctx.textBaseline = 'middle';
+				canvas_ctx.textAlign = 'center';
+
+				var text = spz.client.resources.view_icons[this.__view_id].text;
+
+				// fit text
+				var text_height = bb.height;
+				canvas_ctx.font = text_height.toString() + 'pt monospace';
+				var text_width = canvas_ctx.measureText(text).width;
+				var max_width = bb.width;
+				while (text_width > max_width) {
+					text_height *= 0.9;
+					canvas_ctx.font = text_height.toString() + 'pt monospace';
+					text_width = canvas_ctx.measureText(text).width;
+				}
+
+				// draw text
+				canvas_ctx.fillText(text, bb.x + (bb.width / 2), bb.y + (bb.height / 2));
+			}
 		},
 
 		__callback_touch_end: function () {
