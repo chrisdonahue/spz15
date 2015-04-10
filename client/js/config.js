@@ -70,8 +70,8 @@ window.spz = window.spz || {};
 	spz.client.options.ui[views_available.keyboard].midi_octaves_displayed = 1;
 
 	// resources
+	spz.client.resources.view_icons = {};
 	if (spz.client.options.ui.view_icons_use) {
-		spz.client.resources.view_icons = {};
 		for (var i = 0; i < spz.client.options.ui.views_enabled.length; i++) {
 			var view_id = spz.client.options.ui.views_enabled[i];
 			var file_name = view_id;
@@ -83,6 +83,17 @@ window.spz = window.spz || {};
 			spz.client.resources.view_icons[view_id].data = null;
 			spz.client.resources.view_icons[view_id].image = null;
 		}
+	}
+	else {
+		for (var i = 0; i < spz.client.options.ui.views_enabled.length; i++) {
+			var view_id = spz.client.options.ui.views_enabled[i];
+			spz.client.resources.view_icons[view_id] = {};
+		}
+		spz.client.resources.view_icons[views_available.keyboard].text = 'Keys';
+		spz.client.resources.view_icons[views_available.envelope].text = 'Env';
+		spz.client.resources.view_icons[views_available.patch].text = 'FX';
+		spz.client.resources.view_icons[views_available.sounds].text = 'SFX';
+		spz.client.resources.view_icons[views_available.output].text = 'Vol';
 	}
 
 	// server options
