@@ -1,2 +1,5 @@
 *.swp
 server/osc2pd/node_modules
+log
+server/a.out
+server/udp.c
