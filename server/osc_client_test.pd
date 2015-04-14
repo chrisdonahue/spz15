@@ -1,4 +1,4 @@
-#N canvas 149 126 834 432 10;
+#N canvas 254 272 834 432 10;
 #X declare -lib mrpeach;
 #X obj 36 27 import mrpeach;
 #X obj 33 347 udpsend;
@@ -22,14 +22,16 @@
 #X msg 36 70 connect 192.168.0.2 80;
 #X msg 247 228 60;
 #X msg 247 273 send /off \$1;
-#X msg 342 274 send /env/attack \$1;
-#X msg 472 275 send /env/release \$1;
-#X msg 342 236 100;
-#X msg 472 235 500;
-#X msg 606 275 send /pan \$1;
-#X obj 609 243 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 0 1;
+#X obj 701 243 hsl 128 15 0 1 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 12700 1;
 #X msg 70 148 connect localhost 1235;
+#X msg 271 356 send /connect 123;
+#X msg 458 370 send /disconnect 123;
+#X msg 342 274 send /env/attack 123 \$1;
+#X msg 531 275 send /env/release 123 \$1;
+#X msg 531 235 0;
+#X msg 698 275 send /pan 123 \$1;
+#X msg 342 236 0;
 #X connect 2 0 1 0;
 #X connect 3 0 1 0;
 #X connect 4 0 5 0;
@@ -50,10 +52,12 @@
 #X connect 19 0 1 0;
 #X connect 20 0 21 0;
 #X connect 21 0 2 0;
-#X connect 22 0 2 0;
-#X connect 23 0 2 0;
-#X connect 24 0 22 0;
-#X connect 25 0 23 0;
+#X connect 22 0 29 0;
+#X connect 23 0 1 0;
+#X connect 24 0 2 0;
+#X connect 25 0 2 0;
 #X connect 26 0 2 0;
-#X connect 27 0 26 0;
-#X connect 28 0 1 0;
+#X connect 27 0 2 0;
+#X connect 28 0 27 0;
+#X connect 29 0 2 0;
+#X connect 30 0 26 0;

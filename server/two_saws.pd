@@ -1,4 +1,4 @@
-#N canvas 268 44 1217 704 10;
+#N canvas 152 33 1217 704 10;
 #X obj 85 373 *~ 2;
 #X obj 85 402 -~ 1;
 #X obj 154 370 *~ 2;
@@ -145,7 +145,7 @@ This patch is used as an abstraction in various examples.;
 -1 -1 0 1;
 #X obj 100 238 *~;
 #X obj 142 213 hsl 128 15 0 100 0 0 empty empty empty -2 -8 0 10 -262144
--1 -1 10045 1;
+-1 -1 0 1;
 #X obj 85 260 +~;
 #X text 207 156 LFO;
 #X text 184 196 comment;
@@ -315,27 +315,27 @@ This patch is used as an abstraction in various examples.;
 #X obj 139 193 r \$1-lfo-amount;
 #X obj 291 528 r \$1-pan;
 #X obj 660 529 vsl 15 128 0 3000 0 0 \$1-attack \$1-attack-in A 5 -7
-0 10 -245052 -1 -1 0 1;
+0 10 -245052 -1 -1 42 1;
 #X obj 679 529 vsl 15 128 10 3000 0 0 \$1-decay \$1-decay-in D 5 -7
 0 10 -245052 -1 -1 0 1;
 #X obj 721 529 vsl 15 128 10 3000 0 0 \$1-release \$1-release-in R
-5 -7 0 10 -245052 -1 -1 402 1;
+5 -7 0 10 -245052 -1 -1 382 1;
 #X obj 700 529 vsl 15 128 0 100 0 0 \$1-sustain \$1-sustain-in S 5
--7 0 10 -245052 -1 -1 7546 1;
+-7 0 10 -245052 -1 -1 9525 1;
 #X obj 637 528 vsl 15 128 0 1 0 0 \$1-velocity \$1-velocity-in vel
-0 -7 0 10 -245052 -1 -1 6985 1;
+0 -7 0 10 -245052 -1 -1 10795 1;
 #X obj 755 528 vsl 15 128 0 1 0 0 \$1-pan \$1-pan-in pan 0 -7 0 10
--262072 -1 -1 12700 1;
+-262072 -1 -1 6350 1;
 #X obj 564 529 vsl 15 128 0 100 0 0 \$1-lfo-freq \$1-lfo-freq-in freq
 -2 -7 0 10 -196352 -1 -1 0 1;
 #X obj 591 529 vsl 15 128 0 100 0 0 \$1-lfo-amount \$1-lfo-amount-in
-amount 0 -7 0 10 -196352 -1 -1 10045 1;
+amount 0 -7 0 10 -196352 -1 -1 0 1;
 #X text 561 496 LFO;
 #X text 636 494 ENV;
 #X text 750 493 PAN;
 #X obj 866 169 loadbang;
 #X text 862 153 load defaults;
-#X floatatom 849 680 5 0 0 0 midi_note #1-notenum-in #1-notenum;
+#X floatatom 859 691 5 0 0 0 midi_note #1-notenum-in #1-notenum;
 #X obj 86 49 inlet;
 #X obj 86 131 mtof~;
 #X obj 86 108 r \$1-notenum;
@@ -376,14 +376,14 @@ amount 0 -7 0 10 -196352 -1 -1 10045 1;
 #X obj 85 797 synth_rev;
 #X text 788 492 REVERB;
 #X obj 791 527 hsl 100 12 0 1 0 0 \$1-rev-roomsize \$1-rev-roomsize-in
-roomsize 0 -5 0 10 -204786 -1 -1 9745 1;
+roomsize 0 -5 0 10 -204786 -1 -1 99 1;
 #X obj 792 556 hsl 100 12 0 1 0 0 \$1-rev-damping \$1-rev-damping-in
-damping 0 -5 0 10 -204786 -1 -1 9719 1;
+damping 0 -5 0 10 -204786 -1 -1 990 1;
 #X obj 793 585 hsl 100 12 0 1 0 0 \$1-rev-width \$1-rev-width-in width
-0 -5 0 10 -204786 -1 -1 9719 1;
-#X obj 793 616 hsl 100 12 0 1 0 0 \$1-rev-wetdry \$1-rev-wetdry-in
-wetdry 0 -5 0 10 -204786 -1 -1 9706 1;
-#X obj 832 641 tgl 15 0 \$1-rev-freeze \$1-rev-freeze-in freeze -40
+0 -5 0 10 -204786 -1 -1 4950 1;
+#X obj 793 615 hsl 100 12 0 1 0 0 \$1-rev-wetdry \$1-rev-wetdry-in
+wetdry 0 -5 0 10 -204786 -1 -1 99 1;
+#X obj 878 638 tgl 15 0 \$1-rev-freeze \$1-rev-freeze-in freeze -40
 7 0 10 -204786 -1 -1 0 1;
 #X obj 102 685 r \$1-rev-roomsize;
 #X obj 110 708 r \$1-rev-damping;
@@ -408,8 +408,8 @@ wetdry 0 -5 0 10 -204786 -1 -1 9706 1;
 #X msg 146 280 0;
 #X obj 350 720 animal_sampler;
 #X obj 1830 38 inlet;
-#X obj 565 678 hradio 24 1 0 9 \$1-pads \$1-pads-in PADS 0 -5 0 10
--191407 -1 -1 3;
+#X obj 565 682 hradio 24 1 0 9 \$1-pads \$1-pads-in PADS 0 -5 0 10
+-191407 -1 -1 0;
 #X obj 350 696 r \$1-pads;
 #X obj 1830 119 s \$1-pads-in;
 #X msg 866 218 \; \$1-lfo-freq-in 0 \; \$1-lfo-amount-in 0 \; \$1-velocity-in
@@ -417,6 +417,12 @@ wetdry 0 -5 0 10 -204786 -1 -1 9706 1;
 \$1-release-in 100 \; \$1-pan-in 0.5 \; \$1-rev-roomsize-in 0.01 \;
 \$1-rev-damping-in 0.1 \; \$1-rev-width-in 0.5 \; \$1-rev-wetdry-in
 0.01 \; \$1-rev-freeze-in 0;
+#X obj 877 668 bng 15 250 50 0 \$1-reset-default \$1-reset-default-in
+reset_default -80 7 0 10 -99865 -66577 -1;
+#X obj 1924 35 inlet;
+#X obj 1924 116 s \$1-reset-default-in;
+#X obj 934 169 r \$1-reset-default;
+#X obj 925 691 print bang;
 #X connect 0 0 1 0;
 #X connect 1 0 4 0;
 #X connect 2 0 3 0;
@@ -530,4 +536,7 @@ wetdry 0 -5 0 10 -204786 -1 -1 9706 1;
 #X connect 155 0 127 1;
 #X connect 156 0 159 0;
 #X connect 158 0 155 0;
+#X connect 161 0 165 0;
+#X connect 162 0 163 0;
+#X connect 164 0 94 0;
 #X coords 0 -1 1 1 355 250 1 550 470;
