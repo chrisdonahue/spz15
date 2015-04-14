@@ -1,4 +1,4 @@
-#N canvas 157 23 1103 708 10;
+#N canvas 93 23 1103 708 10;
 #X declare -lib mrpeach;
 #X obj 1241 83 mtof~;
 #N canvas 169 26 1280 711 osc-parsing 0;
