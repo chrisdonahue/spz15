@@ -97,6 +97,6 @@ window.spz = window.spz || {};
 	}
 
 	// server options
-    spz.server.options.ip = 'cdonahue.me';
+    spz.server.options.ip = 'localhost';//'cdonahue.me';
 	spz.server.options.port = 1234;
 })(window.spz, window.capp);
