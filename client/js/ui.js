@@ -152,7 +152,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redrawing slider');
+			//console.log('redrawing slider');
 
 			var settings = this.__settings;
 			var bb = this._bb;
@@ -325,7 +325,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw root');
+			//console.log('redraw root');
 
 			var bb = this._bb;
 			var nav_bb = this.__nav_bb;
@@ -364,7 +364,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw nav_button_' + this.__view_id);
+			//console.log('redraw nav_button_' + this.__view_id);
 			var bb = this._bb;
 
 			canvas_ctx.fillStyle = this.__settings.color;
@@ -551,7 +551,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw envelope');
+			//console.log('redraw envelope');
 			var bb = this._bb;
 
 			canvas_ctx.fillStyle = this.__settings.color;
@@ -659,7 +659,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw patch');
+			//console.log('redraw patch');
 			var bb = this._bb;
 
 			canvas_ctx.fillStyle = this.__settings.color;
@@ -698,7 +698,7 @@
 					var pad = this.__pads[j * 3 + i];
 					var pad_bb = bb_rel.to_abs(bb).with_border(size * 0.2, size * 0.2);
 					pad.bb_set(pad_bb);
-					console.log(pad_bb);
+					//console.log(pad_bb);
 					bb_rel.x += size;
 				}
 				bb_rel.x = 0.0;
@@ -707,7 +707,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw sounds');
+			//console.log('redraw sounds');
 			var bb = this._bb;
 
 			canvas_ctx.fillStyle = this.__settings.color;
@@ -759,7 +759,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw output');
+			//console.log('redraw output');
 			var bb = this._bb;
 
 			canvas_ctx.fillStyle = this.__settings.color;
@@ -843,7 +843,7 @@
 		},
 
 		_redraw: function (canvas_ctx) {
-			console.log('redraw keyboard');
+			//console.log('redraw keyboard');
 
 			var bb = this._bb;
 			var settings = this.__settings;
