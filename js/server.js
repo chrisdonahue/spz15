@@ -9,11 +9,13 @@
 	
 	spz.server.callbacks.open = function (event) {
 		console.log('socket open');
+		spz.server.connected = true;
 		spz.server.osc.send('/connect');
 	};
 	
 	spz.server.callbacks.close = function (event) {
 		console.log('socket close');
+		alert('Connection lost. Please refresh this page');
 	};
 	
 	spz.server.callbacks.message = function (event) {
@@ -29,10 +31,15 @@
 
 	spz.server.osc.send = function (message_address, parameters) {
 		parameters = parameters || [];
-		spz.server.socket_osc.send({
-			address: message_address,
-			args: [spz.client.fingerprint].concat(parameters)
-		});
+		if (spz.server.connected) {
+			spz.server.socket_osc.send({
+				address: message_address,
+				args: [spz.client.fingerprint].concat(parameters)
+			});
+		}
+		else {
+			console.log('not connected to server');
+		}
 	};
 
 	var views_available = spz.defines.views_available;
@@ -110,6 +117,7 @@
 	spz.client.fingerprint = ((new Date()).getTime()) % (new fingerprint().get());
 	
 	try {
+		spz.server.connected = false;
 		var server_uri = 'ws://' + String(spz.server.options.ip) + ':' + String(spz.server.options.port);
 		spz.server.socket_osc = new osc.WebSocketPort({
 			url: server_uri
@@ -126,7 +134,7 @@
 	spz.server.socket_osc.on('message', spz.server.callbacks.message);
 	spz.server.socket_osc.on('error', spz.server.callbacks.error);
 
-	// open port
+	// open socket
 	spz.server.socket_osc.open();
 
 })(window.spz, window.osc, window.Fingerprint);
